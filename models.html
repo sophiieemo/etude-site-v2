@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Models</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    /* Neutral ramp — the whole palette. No hue anywhere. */
+    --ink:        #0b0b0d;   /* headlines, primary text */
+    --ink-2:      #6e6e73;   /* secondary text */
+    --ink-3:      #a1a1a6;   /* tertiary, placeholders */
+    --line:       #e0e0e3;   /* hairlines */
+    --surface:    #f5f5f7;   /* raised panels */
+    --bg:         #ffffff;
+
+    /* Smoked glass — liquid glass read for a white page. A faint graphite
+       pane instead of a white one (white on white doesn't register), a
+       hairline dark rim, and a bright inner lip where light catches. */
+    --glass-fill:       rgba(11, 11, 13, 0.05);
+    --glass-fill-hover: rgba(11, 11, 13, 0.08);
+    --glass-rim:        rgba(11, 11, 13, 0.10);
+    --glass-rim-hover:  rgba(11, 11, 13, 0.17);
+    --glass-blur:       blur(18px) saturate(140%);
+    --glass-lip:        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    --glass-lift:       0 1px 2px rgba(11, 11, 13, 0.04),
+                        0 5px 14px rgba(11, 11, 13, 0.05);
+    --glass-lift-hover: 0 2px 4px rgba(11, 11, 13, 0.07),
+                        0 14px 34px rgba(11, 11, 13, 0.11);
+
+    /* Same construction at full density, for controls that carry a page. */
+    --ink-glass:        rgba(11, 11, 13, 0.90);
+    --ink-glass-hover:  rgba(11, 11, 13, 0.97);
+  }
+  html { height: 100%; }
+  body {
+    background: var(--bg);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 70px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+  }
+  .nav-group-left {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+  }
+  .logo-spot {
+    width: auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .logo-text {
+    font-family: "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 35px;
+    position: relative;
+  }
+  .nav-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .nav-caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 7px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+    opacity: 0.85;
+    transition: transform 0.2s ease;
+  }
+  .nav-dropdown:hover .nav-caret,
+  .nav-dropdown:focus-within .nav-caret {
+    transform: rotate(180deg);
+  }
+  .nav-menu {
+    position: absolute;
+    top: 100%;
+    left: -14px;
+    min-width: 170px;
+    padding: 8px;
+    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid var(--glass-rim);
+    border-radius: 12px;
+    box-shadow: var(--glass-lift);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    z-index: 60;
+  }
+  /* bridges the gap so the menu doesn't close while moving the cursor to it */
+  .nav-dropdown::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 14px;
+  }
+  .nav-dropdown:hover .nav-menu,
+  .nav-dropdown:focus-within .nav-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .nav-menu a {
+    display: block;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-family: "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-menu a:hover {
+    background: var(--surface);
+  }
+  .nav-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 2px;
+    pointer-events: none;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1), width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav-link {
+    font-family: "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;    font-size: 17px;
+    font-weight: 400;
+    color: var(--ink-2);
+    text-decoration: none;
+    padding: 10px 0;
+    transition: color 0.2s ease;
+  }
+  .nav-link:hover {
+    color: var(--ink);
+  }
+  .nav-link.active {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .nav-right {
+    display: flex;
+    align-items: center;
+  }
+  /* same liquid-glass treatment as the hero CTA, scaled down */
+  .download-link {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-block;
+    font-family: "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 9px 22px;
+    border-radius: 999px;
+    /* lens gradient over the graphite wash — brighter at the top where the
+       light lands, settling into the tint at the bottom */
+    background:
+      linear-gradient(168deg,
+        rgba(255, 255, 255, 0.72) 0%,
+        rgba(255, 255, 255, 0.18) 46%,
+        rgba(255, 255, 255, 0) 62%),
+      var(--glass-fill);
+    backdrop-filter: blur(14px) saturate(200%) brightness(1.05);
+    -webkit-backdrop-filter: blur(14px) saturate(200%) brightness(1.05);
+    border: 1px solid var(--glass-rim);
+    box-shadow:
+      0 1px 1px rgba(11, 11, 13, 0.03),
+      0 2px 6px rgba(11, 11, 13, 0.035),
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -2px 3px -2px rgba(11, 11, 13, 0.13),
+      inset 0 0 14px rgba(255, 255, 255, 0.55);
+    transition: transform 0.5s cubic-bezier(0.34, 1.7, 0.5, 1),
+                background 0.35s ease,
+                box-shadow 0.35s ease,
+                border-color 0.35s ease;
+  }
+  /* specular streak — parked off the left edge, sweeps across on hover */
+  .download-link::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(102deg,
+      rgba(255, 255, 255, 0) 34%,
+      rgba(255, 255, 255, 0.95) 50%,
+      rgba(255, 255, 255, 0) 66%);
+    transform: translateX(-130%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+    transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+                opacity 0.3s ease;
+  }
+  /* the rounded edge of the glass: light catches the top-left, the
+     bottom-right falls into shadow, so the pill reads as a solid object */
+  .download-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(150deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 0.15) 38%,
+      rgba(11, 11, 13, 0.07) 66%,
+      rgba(11, 11, 13, 0.15) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: -1;
+    transition: opacity 0.35s ease;
+    opacity: 0.9;
+  }
+  .download-link:hover {
+    transform: translateY(-2px) scale(1.04);
+    border-color: var(--glass-rim-hover);
+    backdrop-filter: blur(18px) saturate(220%) brightness(1.08);
+    -webkit-backdrop-filter: blur(18px) saturate(220%) brightness(1.08);
+    box-shadow:
+      0 1px 2px rgba(11, 11, 13, 0.04),
+      0 5px 12px rgba(11, 11, 13, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -2px 4px -2px rgba(11, 11, 13, 0.16),
+      inset 0 0 18px rgba(255, 255, 255, 0.7);
+  }
+  .download-link:hover::before {
+    transform: translateX(130%);
+    opacity: 1;
+  }
+  .download-link:hover::after {
+    opacity: 1;
+  }
+  /* press squishes the glass, then it springs back */
+  .download-link:active {
+    transform: translateY(0) scale(0.95);
+    transition: transform 0.11s ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .download-link {
+      transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .download-link::before {
+      display: none;
+    }
+    .download-link:hover,
+    .download-link:active {
+      transform: none;
+    }
+  }
+
+  .models-page {
+    width: 100%;
+    padding: 56px 30px 100px;
+  }
+  .models-heading {
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-size: 34px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 32px 62px;
+    text-align: left;
+  }
+  .models-heading-sub {
+    color: var(--ink-3);
+    font-weight: 400;
+    margin-left: 14px;
+  }
+  .filter-tabs {
+    margin-left: 62px;
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 6px 0 14px;
+    margin-bottom: 40px;
+  }
+  /* liquid-glass filter tabs — the pane is a translucent brand blue (the page
+     is white, so white-on-white glass wouldn't read), with the usual white
+     rim and inner glow catching the light. */
+  .filter-tab {
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--ink-2);
+    background: none;
+    border: 1px solid transparent;
+    padding: 9px 20px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.25s ease,
+                color 0.25s ease,
+                border-color 0.25s ease,
+                box-shadow 0.25s ease,
+                transform 0.4s cubic-bezier(0.34, 1.7, 0.5, 1);
+  }
+  .filter-tab:hover {
+    color: var(--ink);
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-color: var(--glass-rim);
+    box-shadow: var(--glass-lift), var(--glass-lip);
+  }
+  .filter-tab.active {
+    color: #ffffff;
+    background: var(--ink-glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 1px 3px rgba(11, 11, 13, 0.14),
+                0 8px 20px rgba(11, 11, 13, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  }
+  .filter-tab.active:hover {
+    background: var(--ink-glass-hover);
+    color: #ffffff;
+    box-shadow: 0 2px 5px rgba(11, 11, 13, 0.16),
+                0 12px 28px rgba(11, 11, 13, 0.20),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .filter-tab:active {
+    transform: scale(0.96);
+    transition: transform 0.11s ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .filter-tab:active {
+      transform: none;
+    }
+  }
+  .models-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding: 4px 0 16px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .models-grid::-webkit-scrollbar {
+    display: none;
+  }
+  .carousel-wrap {
+    position: relative;
+    /* Same width as before (100vw - 122px), but split evenly left/right
+       so the row is centered rather than sitting flush to the right edge. */
+    margin-left: 31px;
+    margin-right: 31px;
+  }
+  .scroll-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-rim);
+    color: var(--ink);
+    box-shadow: var(--glass-lift), var(--glass-lip);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 5;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .scroll-arrow.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .scroll-arrow:hover {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: var(--glass-rim-hover);
+  }
+  .scroll-arrow-left {
+    left: 16px;
+  }
+  .scroll-arrow-right {
+    right: 16px;
+  }
+  .scroll-arrow svg {
+    width: 18px;
+    height: 18px;
+  }
+  .model-card {
+    background: var(--bg);
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    box-shadow: 0 1px 2px rgba(11, 11, 13, 0.04),
+                0 6px 18px rgba(11, 11, 13, 0.05);
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Narrower, taller cards — sized so ~5 fit across the full-bleed row:
+       100vw minus the row's 80px side padding and the 4 gaps between cards. */
+    width: calc((100vw - 218px) / 5);
+    min-width: 250px;
+    max-width: 330px;
+    min-height: 520px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+  .model-card:hover {
+    transform: translateY(-6px);
+    border-color: var(--glass-rim);
+    box-shadow: 0 2px 4px rgba(11, 11, 13, 0.06),
+                0 16px 36px rgba(11, 11, 13, 0.11);
+  }
+  .model-card-art {
+    width: 100%;
+    height: 210px;
+    border-radius: 12px;
+    margin-bottom: 14px;
+  }
+  .model-card-name {
+    font-family: "Cabinet Grotesk", "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .model-card-meta {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .model-card-desc {
+    font-family: "Cabinet Grotesk", "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    margin-top: 6px;
+  }
+  .model-card-size {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--ink-3);
+  }
+  .model-card-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 20px;
+  }
+  /* glass card actions — same blue-tinted pane as the filter tabs, since the
+     cards sit on white. "Learn more" is the quieter, near-clear variant. */
+  .btn-learn {
+    font-family: "Cabinet Grotesk", "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: var(--glass-fill);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-rim);
+    box-shadow: var(--glass-lift), var(--glass-lip);
+    transition: background 0.25s ease,
+                color 0.25s ease,
+                border-color 0.25s ease,
+                box-shadow 0.25s ease,
+                transform 0.4s cubic-bezier(0.34, 1.7, 0.5, 1);
+  }
+  .btn-learn:hover {
+    color: var(--ink);
+    background: var(--glass-fill-hover);
+    border-color: var(--glass-rim-hover);
+    box-shadow: var(--glass-lift-hover), var(--glass-lip);
+  }
+  .btn-download {
+    font-family: "Cabinet Grotesk", "Inter", "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    text-decoration: none;
+    white-space: nowrap;
+    padding: 7px 13px;
+    border-radius: 999px;
+    background: var(--ink-glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 1px 3px rgba(11, 11, 13, 0.14),
+                0 8px 20px rgba(11, 11, 13, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    transition: background 0.25s ease,
+                border-color 0.25s ease,
+                box-shadow 0.25s ease,
+                transform 0.4s cubic-bezier(0.34, 1.7, 0.5, 1);
+  }
+  .btn-download:hover {
+    background: var(--ink-glass-hover);
+    box-shadow: 0 2px 5px rgba(11, 11, 13, 0.16),
+                0 12px 28px rgba(11, 11, 13, 0.20),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  .btn-learn:active,
+  .btn-download:active {
+    transform: scale(0.96);
+    transition: transform 0.11s ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-learn:active,
+    .btn-download:active {
+      transform: none;
+    }
+  }
+
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="nav-group-left">
+      <div class="logo-spot"><a href="index.html" class="logo-link"><span class="logo-text">Étude</span></a></div>
+      <div class="nav-left">
+      <span class="nav-dropdown"><a href="resources.html" class="nav-link ">Resources<span class="nav-caret"></span></a><div class="nav-menu"><a href="resources.html">Docs</a><a href="#">Blog</a></div></span>
+      <a href="models.html" class="nav-link active">Models</a>
+      <a href="community.html" class="nav-link ">Community</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a href="download.html" class="download-link ">Download</a>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var navLeft = document.querySelector('.nav-left');
+      if (!navLeft) return;
+      var links = navLeft.querySelectorAll('.nav-link');
+      var indicator = document.createElement('div');
+      indicator.className = 'nav-indicator';
+      navLeft.appendChild(indicator);
+
+      function moveIndicatorTo(el) {
+        if (!el) {
+          indicator.style.width = '0';
+          return;
+        }
+        // Measured against .nav-left rather than offsetLeft, since the
+        // Resources dropdown wrapper is itself positioned and would
+        // otherwise become the offset parent.
+        var navRect = navLeft.getBoundingClientRect();
+        var rect = el.getBoundingClientRect();
+        indicator.style.left = (rect.left - navRect.left) + 'px';
+        indicator.style.width = rect.width + 'px';
+      }
+
+      var activeLink = navLeft.querySelector('.nav-link.active');
+      moveIndicatorTo(activeLink);
+
+      links.forEach(function(link) {
+        link.addEventListener('mouseenter', function() {
+          moveIndicatorTo(link);
+        });
+      });
+      navLeft.addEventListener('mouseleave', function() {
+        moveIndicatorTo(activeLink);
+      });
+      window.addEventListener('resize', function() {
+        moveIndicatorTo(activeLink);
+      });
+    })();
+  </script>
+  <div class="models-page">
+    <h1 class="models-heading">Models Available<span class="models-heading-sub">for Every Occasion</span></h1>
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="all">All Models Supported</button>
+      <button class="filter-tab" data-filter="general">General Purpose</button>
+      <button class="filter-tab" data-filter="code">Code</button>
+      <button class="filter-tab" data-filter="vision">Vision</button>
+      <button class="filter-tab" data-filter="compact">Compact</button>
+    </div>
+    <div class="carousel-wrap">
+      <button class="scroll-arrow scroll-arrow-left" id="scrollLeftBtn" aria-label="Scroll left">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="models-grid" id="modelsGrid">
+      <div class="model-card" data-category="general">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #2f2f33, #6e6e73);"></div>
+        <div class="model-card-meta">Meta</div>
+        <div class="model-card-name">Llama 3.1</div>
+        <div class="model-card-desc">General-purpose open-weight model, strong at reasoning and coding tasks.</div>
+        <div class="model-card-size">8B / 70B / 405B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="general">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #6e6e73, #2f2f33);"></div>
+        <div class="model-card-meta">Mistral AI</div>
+        <div class="model-card-name">Mixtral 8x7B</div>
+        <div class="model-card-desc">Sparse mixture-of-experts model balancing speed and quality.</div>
+        <div class="model-card-size">46.7B (MoE)</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="general">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #8e8e93, #3a3a3e);"></div>
+        <div class="model-card-meta">Alibaba</div>
+        <div class="model-card-name">Qwen2</div>
+        <div class="model-card-desc">Multilingual model with strong performance across benchmarks.</div>
+        <div class="model-card-size">7B / 72B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="general">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #3a3a3e, #131316);"></div>
+        <div class="model-card-meta">Cohere</div>
+        <div class="model-card-name">Command R</div>
+        <div class="model-card-desc">Tuned for retrieval-augmented generation and tool use.</div>
+        <div class="model-card-size">35B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="general">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #5a5a5f, #1d1d1f);"></div>
+        <div class="model-card-meta">TII</div>
+        <div class="model-card-name">Falcon 180B</div>
+        <div class="model-card-desc">Large-scale open model trained on a curated web corpus.</div>
+        <div class="model-card-size">180B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="general">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #2f2f33, #6e6e73);"></div>
+        <div class="model-card-meta">01.AI</div>
+        <div class="model-card-name">Yi-34B</div>
+        <div class="model-card-desc">Bilingual English/Chinese model with long-context support.</div>
+        <div class="model-card-size">34B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="general">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #1d1d1f, #55555a);"></div>
+        <div class="model-card-meta">LMSYS</div>
+        <div class="model-card-name">Vicuna</div>
+        <div class="model-card-desc">Fine-tuned conversational model built on open base weights.</div>
+        <div class="model-card-size">7B / 13B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="code">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #9a9aa0, #55555a);"></div>
+        <div class="model-card-meta">DeepSeek</div>
+        <div class="model-card-name">DeepSeek-V2</div>
+        <div class="model-card-desc">Efficient mixture-of-experts model for coding and reasoning.</div>
+        <div class="model-card-size">236B (MoE)</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="code">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #55555a, #a8a8ad);"></div>
+        <div class="model-card-meta">Meta</div>
+        <div class="model-card-name">Code Llama</div>
+        <div class="model-card-desc">Llama fine-tuned specifically for code generation and completion.</div>
+        <div class="model-card-size">7B / 13B / 34B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="code">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #a8a8ad, #7c7c81);"></div>
+        <div class="model-card-meta">BigCode</div>
+        <div class="model-card-name">StarCoder2</div>
+        <div class="model-card-desc">Trained on permissively-licensed source code across 600+ languages.</div>
+        <div class="model-card-size">3B / 7B / 15B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="vision">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #d2d2d7, #86868b);"></div>
+        <div class="model-card-meta">LMSYS</div>
+        <div class="model-card-name">LLaVA</div>
+        <div class="model-card-desc">Multimodal model connecting a vision encoder to an LLM for image understanding.</div>
+        <div class="model-card-size">7B / 13B / 34B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="vision">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #86868b, #c8c8cd);"></div>
+        <div class="model-card-meta">Alibaba</div>
+        <div class="model-card-name">Qwen2-VL</div>
+        <div class="model-card-desc">Vision-language model for image and video understanding tasks.</div>
+        <div class="model-card-size">2B / 7B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="compact">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #1d1d1f, #48484c);"></div>
+        <div class="model-card-meta">Mistral AI</div>
+        <div class="model-card-name">Mistral 7B</div>
+        <div class="model-card-desc">Compact, fast model tuned for efficient local inference.</div>
+        <div class="model-card-size">7B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="compact">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #48484c, #1d1d1f);"></div>
+        <div class="model-card-meta">Google</div>
+        <div class="model-card-name">Gemma 2</div>
+        <div class="model-card-desc">Lightweight model family built from the same research as Gemini.</div>
+        <div class="model-card-size">9B / 27B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="compact">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #131316, #3a3a3e);"></div>
+        <div class="model-card-meta">Microsoft</div>
+        <div class="model-card-name">Phi-3</div>
+        <div class="model-card-desc">Small model optimized for reasoning given its size.</div>
+        <div class="model-card-size">3.8B / 14B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      <div class="model-card" data-category="compact">
+        <div class="model-card-art" style="background:linear-gradient(135deg, #3a3a3e, #0b0b0d);"></div>
+        <div class="model-card-meta">Stability AI</div>
+        <div class="model-card-name">StableLM 2</div>
+        <div class="model-card-desc">Compact models designed for on-device deployment.</div>
+        <div class="model-card-size">1.6B / 12B</div>
+        <div class="model-card-actions">
+          <a href="#" class="btn-learn">Learn more</a>
+          <a href="download.html" class="btn-download">Download</a>
+        </div>
+      </div>
+      </div>
+      <button class="scroll-arrow scroll-arrow-right" id="scrollRightBtn" aria-label="Scroll right">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var tabs = document.querySelectorAll('.filter-tab');
+      var cards = document.querySelectorAll('.model-card');
+      tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          tabs.forEach(function(t) { t.classList.remove('active'); });
+          tab.classList.add('active');
+          var filter = tab.getAttribute('data-filter');
+          cards.forEach(function(card) {
+            var match = filter === 'all' || card.getAttribute('data-category') === filter;
+            card.style.display = match ? '' : 'none';
+          });
+          updateArrows();
+        });
+      });
+
+      var grid = document.getElementById('modelsGrid');
+      var leftBtn = document.getElementById('scrollLeftBtn');
+      var rightBtn = document.getElementById('scrollRightBtn');
+
+      function updateArrows() {
+        if (!grid) return;
+        var maxScroll = grid.scrollWidth - grid.clientWidth;
+        leftBtn.classList.toggle('visible', grid.scrollLeft > 4);
+        rightBtn.classList.toggle('visible', grid.scrollLeft < maxScroll - 4);
+      }
+
+      if (grid) {
+        grid.addEventListener('scroll', updateArrows, { passive: true });
+        window.addEventListener('resize', updateArrows);
+        leftBtn.addEventListener('click', function() {
+          grid.scrollBy({ left: -grid.clientWidth * 0.8, behavior: 'smooth' });
+        });
+        rightBtn.addEventListener('click', function() {
+          grid.scrollBy({ left: grid.clientWidth * 0.8, behavior: 'smooth' });
+        });
+        updateArrows();
+      }
+    })();
+  </script>
+
+
+</body>
+</html>

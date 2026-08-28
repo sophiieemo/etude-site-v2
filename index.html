@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    /* Neutral ramp — the whole palette. No hue anywhere. */
+    --ink:        #0b0b0d;   /* headlines, primary text */
+    --ink-2:      #6e6e73;   /* secondary text */
+    --ink-3:      #a1a1a6;   /* tertiary, placeholders */
+    --line:       #e0e0e3;   /* hairlines */
+    --surface:    #f5f5f7;   /* raised panels */
+    --bg:         #ffffff;
+
+    /* Smoked glass — liquid glass read for a white page. A faint graphite
+       pane instead of a white one (white on white doesn't register), a
+       hairline dark rim, and a bright inner lip where light catches. */
+    --glass-fill:       rgba(11, 11, 13, 0.05);
+    --glass-fill-hover: rgba(11, 11, 13, 0.08);
+    --glass-rim:        rgba(11, 11, 13, 0.10);
+    --glass-rim-hover:  rgba(11, 11, 13, 0.17);
+    --glass-blur:       blur(18px) saturate(140%);
+    --glass-lip:        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    --glass-lift:       0 1px 2px rgba(11, 11, 13, 0.04),
+                        0 5px 14px rgba(11, 11, 13, 0.05);
+    --glass-lift-hover: 0 2px 4px rgba(11, 11, 13, 0.07),
+                        0 14px 34px rgba(11, 11, 13, 0.11);
+
+    /* Same construction at full density, for controls that carry a page. */
+    --ink-glass:        rgba(11, 11, 13, 0.90);
+    --ink-glass-hover:  rgba(11, 11, 13, 0.97);
+  }
+  html { height: 100%; }
+  body {
+    background: var(--bg);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+  }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    height: 70px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+  }
+  .nav-group-left {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+  }
+  .logo-spot {
+    width: auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .logo-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .logo-text {
+    font-family: "Satoshi", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 35px;
+    position: relative;
+  }
+  .nav-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .nav-caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 7px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+    opacity: 0.85;
+    transition: transform 0.2s ease;
+  }
+  .nav-dropdown:hover .nav-caret,
+  .nav-dropdown:focus-within .nav-caret {
+    transform: rotate(180deg);
+  }
+  .nav-menu {
+    position: absolute;
+    top: 100%;
+    left: -14px;
+    min-width: 170px;
+    padding: 8px;
+    margin-top: 10px;
+    background: rgba(255, 255, 255, 0.86);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid var(--glass-rim);
+    border-radius: 12px;
+    box-shadow: var(--glass-lift);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    z-index: 60;
+  }
+  /* bridges the gap so the menu doesn't close while moving the cursor to it */
+  .nav-dropdown::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 14px;
+  }
+  .nav-dropdown:hover .nav-menu,
+  .nav-dropdown:focus-within .nav-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .nav-menu a {
+    display: block;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-family: "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--ink);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-menu a:hover {
+    background: var(--surface);
+  }
+  .nav-indicator {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--ink);
+    border-radius: 2px;
+    pointer-events: none;
+    transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1), width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav-link {
+    font-family: "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: var(--ink-2);
+    text-decoration: none;
+    padding: 10px 0;
+    transition: color 0.2s ease;
+  }
+  .nav-link:hover {
+    color: var(--ink);
+  }
+  .nav-link.active {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .nav-right {
+    display: flex;
+    align-items: center;
+  }
+  /* same liquid-glass treatment as the hero CTA, scaled down */
+  .download-link {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-block;
+    font-family: "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 9px 22px;
+    border-radius: 999px;
+    /* lens gradient over the graphite wash — brighter at the top where the
+       light lands, settling into the tint at the bottom */
+    background:
+      linear-gradient(168deg,
+        rgba(255, 255, 255, 0.72) 0%,
+        rgba(255, 255, 255, 0.18) 46%,
+        rgba(255, 255, 255, 0) 62%),
+      var(--glass-fill);
+    backdrop-filter: blur(14px) saturate(200%) brightness(1.05);
+    -webkit-backdrop-filter: blur(14px) saturate(200%) brightness(1.05);
+    border: 1px solid var(--glass-rim);
+    box-shadow:
+      0 1px 1px rgba(11, 11, 13, 0.03),
+      0 2px 6px rgba(11, 11, 13, 0.035),
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -2px 3px -2px rgba(11, 11, 13, 0.13),
+      inset 0 0 14px rgba(255, 255, 255, 0.55);
+    transition: transform 0.5s cubic-bezier(0.34, 1.7, 0.5, 1),
+                background 0.35s ease,
+                box-shadow 0.35s ease,
+                border-color 0.35s ease;
+  }
+  /* specular streak — parked off the left edge, sweeps across on hover */
+  .download-link::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: linear-gradient(102deg,
+      rgba(255, 255, 255, 0) 34%,
+      rgba(255, 255, 255, 0.95) 50%,
+      rgba(255, 255, 255, 0) 66%);
+    transform: translateX(-130%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+    transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+                opacity 0.3s ease;
+  }
+  /* the rounded edge of the glass: light catches the top-left, the
+     bottom-right falls into shadow, so the pill reads as a solid object */
+  .download-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(150deg,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 0.15) 38%,
+      rgba(11, 11, 13, 0.07) 66%,
+      rgba(11, 11, 13, 0.15) 100%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: -1;
+    transition: opacity 0.35s ease;
+    opacity: 0.9;
+  }
+  .download-link:hover {
+    transform: translateY(-2px) scale(1.04);
+    border-color: var(--glass-rim-hover);
+    backdrop-filter: blur(18px) saturate(220%) brightness(1.08);
+    -webkit-backdrop-filter: blur(18px) saturate(220%) brightness(1.08);
+    box-shadow:
+      0 1px 2px rgba(11, 11, 13, 0.04),
+      0 5px 12px rgba(11, 11, 13, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -2px 4px -2px rgba(11, 11, 13, 0.16),
+      inset 0 0 18px rgba(255, 255, 255, 0.7);
+  }
+  .download-link:hover::before {
+    transform: translateX(130%);
+    opacity: 1;
+  }
+  .download-link:hover::after {
+    opacity: 1;
+  }
+  /* press squishes the glass, then it springs back */
+  .download-link:active {
+    transform: translateY(0) scale(0.95);
+    transition: transform 0.11s ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .download-link {
+      transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .download-link::before {
+      display: none;
+    }
+    .download-link:hover,
+    .download-link:active {
+      transform: none;
+    }
+  }
+
+  .hero {
+    height: 65vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 200px 24px 40px;
+  }
+  .hero-content {
+    max-width: 1250px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: headline-in 0.9s cubic-bezier(0.22, 0.61, 0.36, 1) 0.15s both;
+  }
+  @keyframes headline-in {
+    0%   { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-content {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .headline {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+    font-size: 72px;
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-align: center;
+    margin: 0;
+  }
+  /* each clause gets its own line, and stays on it */
+  .headline-line {
+    display: block;
+    text-wrap: balance;
+  }
+  .headline-line + .headline-line {
+    margin-top: 10px;
+  }
+  @media (max-width: 900px) {
+    .headline { font-size: 44px; }
+  }
+
+  /* Liquid-glass CTA: translucent pane + blurred backdrop, an inner rim of
+     light, and a specular highlight that sweeps across on hover. */
+  .cta-button {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-block;
+    margin-top: 44px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #ffffff;
+    text-decoration: none;
+    padding: 17px 46px;
+    border-radius: 999px;
+    background: var(--ink-glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 2px 6px rgba(11, 11, 13, 0.16),
+                0 14px 34px rgba(11, 11, 13, 0.20),
+                inset 0 1px 0 rgba(255, 255, 255, 0.26);
+    transition: transform 0.5s cubic-bezier(0.34, 1.7, 0.5, 1),
+                background 0.35s ease,
+                box-shadow 0.35s ease,
+                border-color 0.35s ease;
+  }
+
+  /* inner rim highlights — the "liquid" edge where light catches the glass */
+  .cta-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset -10px -8px 0 -12px rgba(255, 255, 255, 0.28),
+                inset 0 10px 0 -10px rgba(255, 255, 255, 0.55);
+    opacity: 0.55;
+    filter: blur(1px);
+    pointer-events: none;
+    z-index: -1;
+    transition: opacity 0.35s ease;
+  }
+
+  .cta-button:hover {
+    transform: translateY(-3px) scale(1.04);
+    background: var(--ink-glass-hover);
+    border-color: rgba(255, 255, 255, 0.24);
+    box-shadow: 0 3px 8px rgba(11, 11, 13, 0.18),
+                0 20px 44px rgba(11, 11, 13, 0.26),
+                inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  }
+  .cta-button:hover::before {
+    opacity: 0.9;
+  }
+  /* press squishes the glass, then it springs back */
+  .cta-button:active {
+    transform: translateY(0) scale(0.95);
+    transition: transform 0.11s ease-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cta-button {
+      transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .cta-button:hover,
+    .cta-button:active {
+      transform: none;
+    }
+  }
+  .cta-subtitle {
+    margin-top: 14px;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--ink-3);
+  }
+
+  .scroll-spacer {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    /* The text/image pair is centred as a unit with a fixed gap between
+       them, rather than pushed apart to the band's edges — so the copy
+       sits near the middle of the screen instead of hugging the margin.
+       The gap collapses on narrower viewports. */
+    justify-content: center;
+    gap: clamp(48px, 7vw, 110px);
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 0 60px;
+  }
+  .next-content {
+    max-width: 660px;
+    text-align: left;
+    opacity: 0;
+    will-change: opacity, transform, filter;
+  }
+  .next-headline {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+    font-size: 56px;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .next-subtitle strong {
+    font-weight: 600;
+  }
+  .next-subtitle {
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--ink-2);
+    margin: 18px 0 0 0;
+  }
+  .media-collage {
+    position: relative;
+    width: 360px;
+    height: 340px;
+    flex-shrink: 0;
+    opacity: 0;
+    will-change: opacity, transform, filter;
+  }
+  .media-card {
+    position: absolute;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    box-shadow: 0 2px 6px rgba(11, 11, 13, 0.06),
+                0 18px 40px rgba(11, 11, 13, 0.13);
+  }
+
+  .scroll-spacer-2 {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    /* The text/image pair is centred as a unit with a fixed gap between
+       them, rather than pushed apart to the band's edges — so the copy
+       sits near the middle of the screen instead of hugging the margin.
+       The gap collapses on narrower viewports. */
+    justify-content: center;
+    gap: clamp(48px, 7vw, 110px);
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 0 60px;
+  }
+  .stage3-content {
+    max-width: 660px;
+    text-align: right;
+    opacity: 0;
+    will-change: opacity, transform, filter;
+  }
+  .stage3-headline {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+    font-size: 56px;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .stage3-subtitle {
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--ink-2);
+    margin: 18px 0 0 0;
+  }
+  /* Kept as plain inline text so the letters stay on the sentence's baseline
+     (inline-block + overflow:hidden shifts the baseline down). The glimmer is
+     a gradient swept across the element's background instead of a clipped
+     overlay, so no layout mode change is needed. */
+  .stage3-subtitle a,
+  .next-subtitle a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 5px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: var(--line);
+    transition: text-decoration-color 0.22s ease,
+                text-underline-offset 0.22s ease;
+  }
+  .stage3-subtitle a:hover,
+  .next-subtitle a:hover {
+    text-decoration-color: var(--ink);
+    text-underline-offset: 3px;
+  }
+  .end-spacer {
+    height: 50vh;
+    width: 100%;
+  }
+  .reveal {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(18px) scale(0.97);
+  }
+  .reveal.is-visible,
+  .is-visible {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+    transition: opacity 0.85s ease, filter 0.85s ease,
+                transform 0.85s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="nav-group-left">
+      <div class="logo-spot"><a href="index.html" class="logo-link"><span class="logo-text">Étude</span></a></div>
+      <div class="nav-left">
+        <span class="nav-dropdown"><a href="resources.html" class="nav-link ">Resources<span class="nav-caret"></span></a><div class="nav-menu"><a href="resources.html">Docs</a><a href="#">Blog</a></div></span>
+        <a href="models.html" class="nav-link ">Models</a>
+        <a href="community.html" class="nav-link ">Community</a>
+      </div>
+    </div>
+    <div class="nav-right">
+      <a href="download.html" class="download-link ">Download</a>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var navLeft = document.querySelector('.nav-left');
+      if (!navLeft) return;
+      var links = navLeft.querySelectorAll('.nav-link');
+      var indicator = document.createElement('div');
+      indicator.className = 'nav-indicator';
+      navLeft.appendChild(indicator);
+
+      function moveIndicatorTo(el) {
+        if (!el) {
+          indicator.style.width = '0';
+          return;
+        }
+        // Measured against .nav-left rather than offsetLeft, since the
+        // Resources dropdown wrapper is itself positioned and would
+        // otherwise become the offset parent.
+        var navRect = navLeft.getBoundingClientRect();
+        var rect = el.getBoundingClientRect();
+        indicator.style.left = (rect.left - navRect.left) + 'px';
+        indicator.style.width = rect.width + 'px';
+      }
+
+      var activeLink = navLeft.querySelector('.nav-link.active');
+      moveIndicatorTo(activeLink);
+
+      links.forEach(function(link) {
+        link.addEventListener('mouseenter', function() {
+          moveIndicatorTo(link);
+        });
+      });
+      navLeft.addEventListener('mouseleave', function() {
+        moveIndicatorTo(activeLink);
+      });
+      window.addEventListener('resize', function() {
+        moveIndicatorTo(activeLink);
+      });
+    })();
+  </script>
+  <div class="hero">
+    <div class="hero-content">
+      <h1 class="headline"><span class="headline-line">Meet Étude.</span><span class="headline-line">The fastest LLM inference on your Mac.</span></h1>
+      <a href="download.html" class="cta-button">Download Now</a>
+      <p class="cta-subtitle">Free to use</p>
+    </div>
+  </div>
+
+  <div class="scroll-spacer">
+    <div class="next-content">
+      <h1 class="next-headline">More work. Less time.</h1>
+      <p class="next-subtitle">Unmatched latency and throughput at your fingertips.</p>
+    </div>
+    <div class="media-collage" id="stage2Media">
+      <div class="media-card" style="width:190px; height:240px; left:0; top:60px; transform:rotate(-6deg); background:linear-gradient(160deg, #2f2f33, #6e6e73);"></div>
+      <div class="media-card" style="width:190px; height:240px; left:110px; top:20px; transform:rotate(4deg); background:linear-gradient(160deg, #b8b8bd, #7c7c81);"></div>
+      <div class="media-card" style="width:160px; height:200px; left:200px; top:110px; transform:rotate(-3deg); background:linear-gradient(160deg, #6e6e73, #1d1d1f);"></div>
+    </div>
+  </div>
+
+  <div class="scroll-spacer-2">
+    <div class="media-collage" id="stage3Media">
+      <div class="media-card" style="width:190px; height:240px; left:0; top:20px; transform:rotate(5deg); background:linear-gradient(160deg, #7c7c81, #2f2f33);"></div>
+      <div class="media-card" style="width:190px; height:240px; left:110px; top:70px; transform:rotate(-4deg); background:linear-gradient(160deg, #1d1d1f, #86868b);"></div>
+      <div class="media-card" style="width:160px; height:200px; left:200px; top:10px; transform:rotate(3deg); background:linear-gradient(160deg, #a1a1a6, #55555a);"></div>
+    </div>
+    <div class="stage3-content">
+      <h1 class="stage3-headline">All natively local to you</h1>
+      <p class="stage3-subtitle">Explore the <a href="models.html">open-weight models</a> offered and be secure that <a href="resources.html">your data stays yours</a>.</p>
+    </div>
+  </div>
+  <div class="end-spacer"></div>
+
+  <script>
+    (function() {
+      // Each section blurs into focus the first time it enters the view,
+      // then stays permanently clear — no scroll-linked blur, damping, or snapping.
+      var targets = [
+        document.querySelector('.next-content'),
+        document.getElementById('stage2Media'),
+        document.querySelector('.stage3-content'),
+        document.getElementById('stage3Media')
+      ].filter(Boolean);
+
+      var reduceMotion = window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (reduceMotion || !('IntersectionObserver' in window)) {
+        targets.forEach(function(el) { el.classList.add('is-visible'); });
+        return;
+      }
+
+      targets.forEach(function(el) { el.classList.add('reveal'); });
+
+      var io = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);   // once revealed, leave it alone
+          }
+        });
+      }, { threshold: 0.25 });
+
+      targets.forEach(function(el) { io.observe(el); });
+    })();
+  </script>
+
+</body>
+</html>
