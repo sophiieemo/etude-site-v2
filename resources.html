@@ -194,27 +194,28 @@
     font-family: "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 15px;
     font-weight: 500;
-    color: var(--ink);
+    color: #ffffff;
     text-decoration: none;
     padding: 9px 22px;
     border-radius: 999px;
-    /* lens gradient over the graphite wash — brighter at the top where the
-       light lands, settling into the tint at the bottom */
+    /* lens gradient over the inked pane — light gathers along the top and
+       falls away into the tint, same as the pale version at a fraction of
+       the strength, since white on near-black carries much further */
     background:
       linear-gradient(168deg,
-        rgba(255, 255, 255, 0.72) 0%,
-        rgba(255, 255, 255, 0.18) 46%,
+        rgba(255, 255, 255, 0.22) 0%,
+        rgba(255, 255, 255, 0.06) 46%,
         rgba(255, 255, 255, 0) 62%),
-      var(--glass-fill);
-    backdrop-filter: blur(14px) saturate(200%) brightness(1.05);
-    -webkit-backdrop-filter: blur(14px) saturate(200%) brightness(1.05);
-    border: 1px solid var(--glass-rim);
+      var(--ink-glass);
+    backdrop-filter: blur(14px) saturate(200%);
+    -webkit-backdrop-filter: blur(14px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     box-shadow:
-      0 1px 1px rgba(11, 11, 13, 0.03),
-      0 2px 6px rgba(11, 11, 13, 0.035),
-      inset 0 1px 0 rgba(255, 255, 255, 1),
-      inset 0 -2px 3px -2px rgba(11, 11, 13, 0.13),
-      inset 0 0 14px rgba(255, 255, 255, 0.55);
+      0 1px 1px rgba(11, 11, 13, 0.10),
+      0 2px 7px rgba(11, 11, 13, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.34),
+      inset 0 -2px 3px -2px rgba(0, 0, 0, 0.5),
+      inset 0 0 14px rgba(255, 255, 255, 0.06);
     transition: transform 0.5s cubic-bezier(0.34, 1.7, 0.5, 1),
                 background 0.35s ease,
                 box-shadow 0.35s ease,
@@ -227,9 +228,9 @@
     inset: -1px;
     border-radius: inherit;
     background: linear-gradient(102deg,
-      rgba(255, 255, 255, 0) 34%,
-      rgba(255, 255, 255, 0.95) 50%,
-      rgba(255, 255, 255, 0) 66%);
+      rgba(255, 255, 255, 0) 26%,
+      rgba(255, 255, 255, 0.30) 50%,
+      rgba(255, 255, 255, 0) 74%);
     transform: translateX(-130%);
     opacity: 0;
     pointer-events: none;
@@ -246,10 +247,10 @@
     border-radius: inherit;
     padding: 1px;
     background: linear-gradient(150deg,
-      rgba(255, 255, 255, 1) 0%,
-      rgba(255, 255, 255, 0.15) 38%,
-      rgba(11, 11, 13, 0.07) 66%,
-      rgba(11, 11, 13, 0.15) 100%);
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.10) 38%,
+      rgba(255, 255, 255, 0.05) 66%,
+      rgba(255, 255, 255, 0.02) 100%);
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -261,15 +262,21 @@
   }
   .download-link:hover {
     transform: translateY(-2px) scale(1.04);
-    border-color: var(--glass-rim-hover);
-    backdrop-filter: blur(18px) saturate(220%) brightness(1.08);
-    -webkit-backdrop-filter: blur(18px) saturate(220%) brightness(1.08);
+    border-color: rgba(255, 255, 255, 0.26);
+    background:
+      linear-gradient(168deg,
+        rgba(255, 255, 255, 0.28) 0%,
+        rgba(255, 255, 255, 0.08) 46%,
+        rgba(255, 255, 255, 0) 62%),
+      var(--ink-glass-hover);
+    backdrop-filter: blur(18px) saturate(220%);
+    -webkit-backdrop-filter: blur(18px) saturate(220%);
     box-shadow:
-      0 1px 2px rgba(11, 11, 13, 0.04),
-      0 5px 12px rgba(11, 11, 13, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 1),
-      inset 0 -2px 4px -2px rgba(11, 11, 13, 0.16),
-      inset 0 0 18px rgba(255, 255, 255, 0.7);
+      0 1px 2px rgba(11, 11, 13, 0.12),
+      0 6px 16px rgba(11, 11, 13, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.45),
+      inset 0 -2px 4px -2px rgba(0, 0, 0, 0.55),
+      inset 0 0 18px rgba(255, 255, 255, 0.09);
   }
   .download-link:hover::before {
     transform: translateX(130%);
@@ -469,11 +476,42 @@
     max-width: 680px;
     margin: 0 0 4px;
   }
+  /* Press, same feel as the models filter tabs — squish under the pointer
+     and spring back out. translateX repeats the hover offset so the two
+     don't fight over `transform`. */
+  .sidebar-section-link:active,
+  .sidebar-subitem:active {
+    transform: translateX(2px) scale(0.96);
+    transition: transform 0.11s ease-out;
+  }
+
+  /* Selected — the dark pill from the models filter tabs. */
+  .sidebar-section-link.active,
   .sidebar-subitem.active {
-    color: var(--ink);
+    color: #ffffff;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.9);
-    border-color: var(--glass-rim);
+    background: var(--ink-glass);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 1px 3px rgba(11, 11, 13, 0.14),
+                0 8px 20px rgba(11, 11, 13, 0.16),
+                inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  }
+  .sidebar-section-link.active:hover,
+  .sidebar-subitem.active:hover {
+    color: #ffffff;
+    background: var(--ink-glass-hover);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 5px rgba(11, 11, 13, 0.16),
+                0 12px 28px rgba(11, 11, 13, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sidebar-section-link:active,
+    .sidebar-subitem:active {
+      transform: none;
+    }
   }
 
   .dot-scroller {
@@ -891,6 +929,58 @@
 
       glow.addEventListener('pointerup', endDrag);
       glow.addEventListener('pointercancel', endDrag);
+    })();
+
+    // ---- sidebar selection -------------------------------------------------
+    // Clicking a link marks it selected, and scrolling keeps that mark honest:
+    // without the scroll half, the pill would still be sitting on whatever you
+    // last clicked long after you'd read past it.
+    (function() {
+      var links = [].slice.call(
+        document.querySelectorAll('.sidebar-section-link, .sidebar-subitem'));
+      var area = document.querySelector('.content-area');
+      if (!links.length || !area) return;
+
+      var targets = links.map(function(a) {
+        var id = (a.getAttribute('href') || '').slice(1);
+        return { link: a, el: id ? document.getElementById(id) : null };
+      }).filter(function(t) { return t.el; });
+
+      function select(link) {
+        links.forEach(function(a) { a.classList.remove('active'); });
+        if (link) link.classList.add('active');
+      }
+
+      links.forEach(function(a) {
+        a.addEventListener('click', function() {
+          select(a);
+          lockUntil = Date.now() + 700;   // let the smooth scroll finish first
+        });
+      });
+
+      // While a click-scroll is animating, the headings stream past and the
+      // spy would fight the click. Ignore it briefly.
+      var lockUntil = 0;
+
+      function sync() {
+        if (Date.now() < lockUntil) return;
+        var best = null, bestTop = -Infinity;
+        var line = area.getBoundingClientRect().top + 120;
+        targets.forEach(function(t) {
+          var top = t.el.getBoundingClientRect().top;
+          if (top <= line && top > bestTop) { bestTop = top; best = t.link; }
+        });
+        if (best && !best.classList.contains('active')) select(best);
+      }
+
+      var ticking = false;
+      area.addEventListener('scroll', function() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(function() { sync(); ticking = false; });
+      }, { passive: true });
+
+      sync();
     })();
   </script>
 
