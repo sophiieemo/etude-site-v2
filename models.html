@@ -37,21 +37,156 @@
     /* Same construction at full density, for controls that carry a page. */
     --ink-glass:        rgba(11, 11, 13, 0.90);
     --ink-glass-hover:  rgba(11, 11, 13, 0.97);
+    --ink-glass-fg:     #ffffff;   /* text on the inked pane */
+
+    /* The one hue on the site: the community network's response to the
+       cursor, and the music notes round the hero. Kept as an R,G,B triplet
+       so alpha can be varied at the point of use. */
+    --net:              74, 144, 217;
+
+    /* Values the pages used to hardcode. They live here so the dark theme
+       below can reach them without every rule being duplicated. */
+    --topbar-bg:        rgba(255, 255, 255, 0.72);
+    --topbar-blur:      saturate(180%) blur(20px);
+    --menu-bg:          rgba(255, 255, 255, 0.86);
+    --pane:             rgba(255, 255, 255, 0.28);  /* free-floating glass */
+    --pane-hover:       rgba(255, 255, 255, 0.46);
+    --sheen:            rgba(255, 255, 255, 0.5);   /* top of a lens gradient */
+    --sheen-soft:       rgba(255, 255, 255, 0.12);
+    --lip:              rgba(255, 255, 255, 0.95);
+    --dot:              rgba(11, 11, 13, 0.34);   /* resources track */
   }
   html { height: 100%; }
   body {
+    color: var(--ink);
     background: var(--bg);
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
+
+  /* ---- dark theme ---------------------------------------------------------
+     Same token names, flipped. Set with data-theme="dark" on <html>, so a
+     rule only needs its own entry here if it hardcoded a light value. */
+  :root[data-theme="dark"] {
+    --ink:        #f2f2f4;
+    --ink-2:      rgba(255, 255, 255, 0.62);
+    --ink-3:      rgba(255, 255, 255, 0.40);
+    --line:       rgba(255, 255, 255, 0.13);
+    --surface:    #141416;
+    --bg:         #0a0a0c;
+
+    /* the pane goes pale instead of graphite — dark on dark doesn't
+       register — and the lip pulls right back, since a full white edge
+       reads as chrome rather than caught light */
+    --glass-fill:       rgba(255, 255, 255, 0.07);
+    --glass-fill-hover: rgba(255, 255, 255, 0.13);
+    --glass-rim:        rgba(255, 255, 255, 0.16);
+    --glass-rim-hover:  rgba(255, 255, 255, 0.30);
+    --glass-lip:        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    --glass-lift:       0 1px 2px rgba(0, 0, 0, 0.5),
+                        0 5px 14px rgba(0, 0, 0, 0.4);
+    --glass-lift-hover: 0 2px 4px rgba(0, 0, 0, 0.55),
+                        0 14px 34px rgba(0, 0, 0, 0.45);
+
+    /* the high-density pane inverts to white with dark text */
+    --ink-glass:        rgba(255, 255, 255, 0.92);
+    --ink-glass-hover:  #ffffff;
+    --ink-glass-fg:     #0b0b0d;
+
+    --topbar-bg:        rgba(255, 255, 255, 0.055);
+    --topbar-blur:      saturate(150%) blur(20px);
+    --menu-bg:          rgba(20, 20, 22, 0.9);
+    --pane:             rgba(255, 255, 255, 0.09);
+    --pane-hover:       rgba(255, 255, 255, 0.16);
+    --sheen:            rgba(255, 255, 255, 0.22);
+    --sheen-soft:       rgba(255, 255, 255, 0.06);
+    --lip:              rgba(255, 255, 255, 0.24);
+
+    --dot:              rgba(255, 255, 255, 0.30);
+
+    --net:              125, 180, 240;
+  }
+  :root[data-theme="dark"] body { color-scheme: dark; }
+
+  /* The inked pill is built from white highlights on a near-black pane. In
+     dark mode the pane is white, so those highlights have nothing to do and
+     the shading has to come from the other side. */
+  :root[data-theme="dark"] .download-link {
+    border-color: rgba(11, 11, 13, 0.18);
+    box-shadow:
+      0 1px 1px rgba(0, 0, 0, 0.5),
+      0 2px 7px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -2px 3px -2px rgba(11, 11, 13, 0.3),
+      inset 0 0 14px rgba(11, 11, 13, 0.05);
+  }
+  :root[data-theme="dark"] .download-link::before {
+    background: linear-gradient(102deg,
+      rgba(11, 11, 13, 0) 26%,
+      rgba(11, 11, 13, 0.16) 50%,
+      rgba(11, 11, 13, 0) 74%);
+  }
+  :root[data-theme="dark"] .download-link::after {
+    background: linear-gradient(150deg,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 255, 255, 0.2) 38%,
+      rgba(11, 11, 13, 0.08) 66%,
+      rgba(11, 11, 13, 0.18) 100%);
+  }
+
+  /* ---- the toggle --------------------------------------------------------- */
+  .theme-toggle {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 90;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--ink);
+    background:
+      linear-gradient(165deg, var(--sheen) 0%, var(--sheen-soft) 42%,
+                      rgba(255, 255, 255, 0) 60%),
+      var(--pane);
+    backdrop-filter: blur(16px) saturate(190%);
+    -webkit-backdrop-filter: blur(16px) saturate(190%);
+    border: 1px solid var(--glass-rim);
+    box-shadow: var(--glass-lift), inset 0 1px 0 var(--lip);
+    transition: background 0.25s ease, border-color 0.25s ease,
+                box-shadow 0.25s ease,
+                transform 0.5s cubic-bezier(0.34, 1.7, 0.5, 1);
+  }
+  .theme-toggle:hover {
+    background:
+      linear-gradient(165deg, var(--sheen) 0%, var(--sheen-soft) 42%,
+                      rgba(255, 255, 255, 0) 60%),
+      var(--pane-hover);
+    border-color: var(--glass-rim-hover);
+    box-shadow: var(--glass-lift-hover), inset 0 1px 0 var(--lip);
+    transform: translateY(-2px);
+  }
+  .theme-toggle:active { transform: scale(0.94); transition: transform 0.11s ease-out; }
+  .theme-toggle svg { width: 19px; height: 19px; display: block; }
+  /* one icon per theme — the other is hidden */
+  .theme-toggle .icon-moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+  @media (prefers-reduced-motion: reduce) {
+    .theme-toggle:hover, .theme-toggle:active { transform: none; }
+  }
+
   .topbar {
     position: sticky;
     top: 0;
     z-index: 50;
     height: 70px;
     width: 100%;
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    background: var(--topbar-bg);
+    backdrop-filter: var(--topbar-blur);
+    -webkit-backdrop-filter: var(--topbar-blur);
     border-bottom: 1px solid var(--line);
     display: flex;
     align-items: center;
@@ -114,7 +249,7 @@
     min-width: 170px;
     padding: 8px;
     margin-top: 10px;
-    background: rgba(255, 255, 255, 0.86);
+    background: var(--menu-bg);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     border: 1px solid var(--glass-rim);
@@ -194,7 +329,7 @@
     font-family: "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 15px;
     font-weight: 500;
-    color: #ffffff;
+    color: var(--ink-glass-fg);
     text-decoration: none;
     padding: 9px 22px;
     border-radius: 999px;
@@ -356,7 +491,7 @@
     box-shadow: var(--glass-lift), var(--glass-lip);
   }
   .filter-tab.active {
-    color: #ffffff;
+    color: var(--ink-glass-fg);
     background: var(--ink-glass);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
@@ -367,7 +502,7 @@
   }
   .filter-tab.active:hover {
     background: var(--ink-glass-hover);
-    color: #ffffff;
+    color: var(--ink-glass-fg);
     box-shadow: 0 2px 5px rgba(11, 11, 13, 0.16),
                 0 12px 28px rgba(11, 11, 13, 0.20),
                 inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -417,11 +552,9 @@
     height: 40px;
     border-radius: 50%;
     background:
-      linear-gradient(165deg,
-        rgba(255, 255, 255, 0.5) 0%,
-        rgba(255, 255, 255, 0.12) 42%,
-        rgba(255, 255, 255, 0) 60%),
-      rgba(255, 255, 255, 0.28);
+      linear-gradient(165deg, var(--sheen) 0%, var(--sheen-soft) 42%,
+                      rgba(255, 255, 255, 0) 60%),
+      var(--pane);
     backdrop-filter: blur(16px) saturate(190%);
     -webkit-backdrop-filter: blur(16px) saturate(190%);
     border: 1px solid var(--glass-rim);
@@ -464,11 +597,9 @@
   }
   .scroll-arrow:hover {
     background:
-      linear-gradient(165deg,
-        rgba(255, 255, 255, 0.62) 0%,
-        rgba(255, 255, 255, 0.16) 42%,
-        rgba(255, 255, 255, 0) 60%),
-      rgba(255, 255, 255, 0.46);
+      linear-gradient(165deg, var(--sheen) 0%, var(--sheen-soft) 42%,
+                      rgba(255, 255, 255, 0) 60%),
+      var(--pane-hover);
     border-color: var(--glass-rim-hover);
     box-shadow:
       0 1px 2px rgba(11, 11, 13, 0.06),
@@ -587,7 +718,7 @@
     font-family: "Cabinet Grotesk", "Inter", "Helvetica Neue", Arial, sans-serif;
     font-size: 14px;
     font-weight: 500;
-    color: #ffffff;
+    color: var(--ink-glass-fg);
     text-decoration: none;
     white-space: nowrap;
     padding: 7px 13px;
@@ -623,6 +754,19 @@
   }
 
 </style>
+  <script>
+    // Runs before first paint so a dark-mode visitor never sees a white flash.
+    (function() {
+      try {
+        var t = localStorage.getItem('etude-theme');
+        if (!t) {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <div class="topbar">
@@ -917,6 +1061,36 @@
     })();
   </script>
 
+
+  <button class="theme-toggle" id="themeToggle" type="button"
+          aria-label="Switch between light and dark" title="Light / dark">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.7" stroke-linecap="round">
+      <circle cx="12" cy="12" r="4.2"></circle>
+      <path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"></path>
+    </svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.2 8.2 0 1 0 10.2 10.2z"></path>
+    </svg>
+  </button>
+
+  <script>
+    // ---- theme -------------------------------------------------------------
+    // The stored choice is applied by an inline script in <head> so the page
+    // never paints light and then flips. This half only wires the button.
+    (function() {
+      var btn = document.getElementById('themeToggle');
+      if (!btn) return;
+      btn.addEventListener('click', function() {
+        var root = document.documentElement;
+        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('etude-theme', next); } catch (e) {}
+        document.dispatchEvent(new CustomEvent('etude:theme', { detail: next }));
+      });
+    })();
+  </script>
 
 </body>
 </html>

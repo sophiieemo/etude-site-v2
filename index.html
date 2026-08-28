@@ -36,21 +36,156 @@
     /* Same construction at full density, for controls that carry a page. */
     --ink-glass:        rgba(11, 11, 13, 0.90);
     --ink-glass-hover:  rgba(11, 11, 13, 0.97);
+    --ink-glass-fg:     #ffffff;   /* text on the inked pane */
+
+    /* The one hue on the site: the community network's response to the
+       cursor, and the music notes round the hero. Kept as an R,G,B triplet
+       so alpha can be varied at the point of use. */
+    --net:              74, 144, 217;
+
+    /* Values the pages used to hardcode. They live here so the dark theme
+       below can reach them without every rule being duplicated. */
+    --topbar-bg:        rgba(255, 255, 255, 0.72);
+    --topbar-blur:      saturate(180%) blur(20px);
+    --menu-bg:          rgba(255, 255, 255, 0.86);
+    --pane:             rgba(255, 255, 255, 0.28);  /* free-floating glass */
+    --pane-hover:       rgba(255, 255, 255, 0.46);
+    --sheen:            rgba(255, 255, 255, 0.5);   /* top of a lens gradient */
+    --sheen-soft:       rgba(255, 255, 255, 0.12);
+    --lip:              rgba(255, 255, 255, 0.95);
+    --dot:              rgba(11, 11, 13, 0.34);   /* resources track */
   }
   html { height: 100%; }
   body {
+    color: var(--ink);
     background: var(--bg);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
   }
+
+  /* ---- dark theme ---------------------------------------------------------
+     Same token names, flipped. Set with data-theme="dark" on <html>, so a
+     rule only needs its own entry here if it hardcoded a light value. */
+  :root[data-theme="dark"] {
+    --ink:        #f2f2f4;
+    --ink-2:      rgba(255, 255, 255, 0.62);
+    --ink-3:      rgba(255, 255, 255, 0.40);
+    --line:       rgba(255, 255, 255, 0.13);
+    --surface:    #141416;
+    --bg:         #0a0a0c;
+
+    /* the pane goes pale instead of graphite — dark on dark doesn't
+       register — and the lip pulls right back, since a full white edge
+       reads as chrome rather than caught light */
+    --glass-fill:       rgba(255, 255, 255, 0.07);
+    --glass-fill-hover: rgba(255, 255, 255, 0.13);
+    --glass-rim:        rgba(255, 255, 255, 0.16);
+    --glass-rim-hover:  rgba(255, 255, 255, 0.30);
+    --glass-lip:        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    --glass-lift:       0 1px 2px rgba(0, 0, 0, 0.5),
+                        0 5px 14px rgba(0, 0, 0, 0.4);
+    --glass-lift-hover: 0 2px 4px rgba(0, 0, 0, 0.55),
+                        0 14px 34px rgba(0, 0, 0, 0.45);
+
+    /* the high-density pane inverts to white with dark text */
+    --ink-glass:        rgba(255, 255, 255, 0.92);
+    --ink-glass-hover:  #ffffff;
+    --ink-glass-fg:     #0b0b0d;
+
+    --topbar-bg:        rgba(255, 255, 255, 0.055);
+    --topbar-blur:      saturate(150%) blur(20px);
+    --menu-bg:          rgba(20, 20, 22, 0.9);
+    --pane:             rgba(255, 255, 255, 0.09);
+    --pane-hover:       rgba(255, 255, 255, 0.16);
+    --sheen:            rgba(255, 255, 255, 0.22);
+    --sheen-soft:       rgba(255, 255, 255, 0.06);
+    --lip:              rgba(255, 255, 255, 0.24);
+
+    --dot:              rgba(255, 255, 255, 0.30);
+
+    --net:              125, 180, 240;
+  }
+  :root[data-theme="dark"] body { color-scheme: dark; }
+
+  /* The inked pill is built from white highlights on a near-black pane. In
+     dark mode the pane is white, so those highlights have nothing to do and
+     the shading has to come from the other side. */
+  :root[data-theme="dark"] .download-link {
+    border-color: rgba(11, 11, 13, 0.18);
+    box-shadow:
+      0 1px 1px rgba(0, 0, 0, 0.5),
+      0 2px 7px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -2px 3px -2px rgba(11, 11, 13, 0.3),
+      inset 0 0 14px rgba(11, 11, 13, 0.05);
+  }
+  :root[data-theme="dark"] .download-link::before {
+    background: linear-gradient(102deg,
+      rgba(11, 11, 13, 0) 26%,
+      rgba(11, 11, 13, 0.16) 50%,
+      rgba(11, 11, 13, 0) 74%);
+  }
+  :root[data-theme="dark"] .download-link::after {
+    background: linear-gradient(150deg,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 255, 255, 0.2) 38%,
+      rgba(11, 11, 13, 0.08) 66%,
+      rgba(11, 11, 13, 0.18) 100%);
+  }
+
+  /* ---- the toggle --------------------------------------------------------- */
+  .theme-toggle {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 90;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--ink);
+    background:
+      linear-gradient(165deg, var(--sheen) 0%, var(--sheen-soft) 42%,
+                      rgba(255, 255, 255, 0) 60%),
+      var(--pane);
+    backdrop-filter: blur(16px) saturate(190%);
+    -webkit-backdrop-filter: blur(16px) saturate(190%);
+    border: 1px solid var(--glass-rim);
+    box-shadow: var(--glass-lift), inset 0 1px 0 var(--lip);
+    transition: background 0.25s ease, border-color 0.25s ease,
+                box-shadow 0.25s ease,
+                transform 0.5s cubic-bezier(0.34, 1.7, 0.5, 1);
+  }
+  .theme-toggle:hover {
+    background:
+      linear-gradient(165deg, var(--sheen) 0%, var(--sheen-soft) 42%,
+                      rgba(255, 255, 255, 0) 60%),
+      var(--pane-hover);
+    border-color: var(--glass-rim-hover);
+    box-shadow: var(--glass-lift-hover), inset 0 1px 0 var(--lip);
+    transform: translateY(-2px);
+  }
+  .theme-toggle:active { transform: scale(0.94); transition: transform 0.11s ease-out; }
+  .theme-toggle svg { width: 19px; height: 19px; display: block; }
+  /* one icon per theme — the other is hidden */
+  .theme-toggle .icon-moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+  @media (prefers-reduced-motion: reduce) {
+    .theme-toggle:hover, .theme-toggle:active { transform: none; }
+  }
+
   .topbar {
     position: sticky;
     top: 0;
     z-index: 50;
     height: 70px;
     width: 100%;
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    background: var(--topbar-bg);
+    backdrop-filter: var(--topbar-blur);
+    -webkit-backdrop-filter: var(--topbar-blur);
     border-bottom: 1px solid var(--line);
     display: flex;
     align-items: center;
@@ -113,7 +248,7 @@
     min-width: 170px;
     padding: 8px;
     margin-top: 10px;
-    background: rgba(255, 255, 255, 0.86);
+    background: var(--menu-bg);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     border: 1px solid var(--glass-rim);
@@ -194,7 +329,7 @@
     font-family: "Fira Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: 15px;
     font-weight: 500;
-    color: #ffffff;
+    color: var(--ink-glass-fg);
     text-decoration: none;
     padding: 9px 22px;
     border-radius: 999px;
@@ -303,6 +438,78 @@
     }
   }
 
+  /* ---- "Étude" hover: the word inks blue and notes scatter -----------------
+     The notes live in a layer over the hero rather than inside the <h1>, so
+     they can travel outside the text box without affecting its layout. */
+  .hero-content { position: relative; }
+  .hero-spark {
+    cursor: default;
+    transition: color 0.32s ease;
+  }
+  .notes-on .hero-spark { color: rgb(var(--net)); }
+
+  .note-field {
+    position: absolute;
+    inset: -170px -60px -110px;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .note {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    color: rgb(var(--net));
+    opacity: 0;
+    /* parked at the centre, scaled down — they grow out of the word */
+    transform: translate3d(-50%, -50%, 0) scale(0.3) rotate(0deg);
+    /* Retracting. Deliberately not the spring below: on the way back an
+       overshoot pushes the notes through the centre before settling, which
+       is what made leaving feel clunky. Short, accelerating, no bounce. */
+    transition: transform 0.3s cubic-bezier(0.45, 0, 0.75, 0.15),
+                opacity 0.19s ease-in;
+    will-change: transform, opacity;
+  }
+  .notes-on .note {
+    /* Expanding — the spring belongs on the way out only. */
+    transition: transform 0.62s cubic-bezier(0.18, 0.9, 0.28, 1.25),
+                opacity 0.34s ease;
+    opacity: var(--o, 0.9);
+    transform: translate3d(calc(-50% + var(--dx) * var(--spread, 1)),
+                           calc(-50% + var(--dy) * var(--spread, 1)), 0)
+               scale(var(--s, 1)) rotate(var(--r, 0deg));
+  }
+  /* The outermost notes sit ~470px either side of centre, which runs past
+     the viewport on a narrow window and adds a horizontal scrollbar. Pull
+     the whole spread in rather than clipping notes in half. */
+  @media (max-width: 1400px) { .note-field { --spread: 0.86; } }
+  @media (max-width: 1280px) { .note-field { --spread: 0.74; } }
+  @media (max-width: 1120px) { .note-field { --spread: 0.6; } }
+  @media (max-width: 980px)  { .note-field { --spread: 0.46; } }
+  @media (max-width: 820px)  { .note-field { --spread: 0.34; } }
+  /* the travel is on the wrapper, so the drift can animate independently */
+  .note svg { display: block; width: 100%; height: 100%; }
+  .note-inner {
+    display: block;
+    width: var(--w, 26px);
+    height: var(--w, 26px);
+  }
+  .note-inner {
+    animation: note-drift 2.9s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+  }
+  @keyframes note-drift {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%      { transform: translateY(-7px) rotate(4deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .note { transition: opacity 0.2s ease; }
+    .notes-on .note {
+      transform: translate3d(calc(-50% + var(--dx) * var(--spread, 1)),
+                             calc(-50% + var(--dy) * var(--spread, 1)), 0);
+    }
+    .note-inner { animation: none; }
+  }
+
   .hero {
     height: 65vh;
     width: 100%;
@@ -361,7 +568,7 @@
     margin-top: 44px;
     font-size: 20px;
     font-weight: 500;
-    color: #ffffff;
+    color: var(--ink-glass-fg);
     text-decoration: none;
     padding: 17px 46px;
     border-radius: 999px;
@@ -556,6 +763,19 @@
   }
 
 </style>
+  <script>
+    // Runs before first paint so a dark-mode visitor never sees a white flash.
+    (function() {
+      try {
+        var t = localStorage.getItem('etude-theme');
+        if (!t) {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <div class="topbar">
@@ -613,9 +833,23 @@
   </script>
   <div class="hero">
     <div class="hero-content">
-      <h1 class="headline"><span class="headline-line">Meet Étude.</span><span class="headline-line">The fastest LLM inference on your Mac.</span></h1>
+      <div class="note-field" aria-hidden="true">
+        <span class="note" style="--dx:-470px;--dy:-212px;--o:0.85;--s:1.0;--r:-16deg;--d:0s;--w:38px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.2 3.3 18 1.5a.6.6 0 0 1 .75.58v3.1a.6.6 0 0 1-.45.58l-5.9 1.56v9.36a3.9 3.9 0 1 1-1.5-3.07V3.88a.6.6 0 0 1 .3-.58z"/></svg></span></span>
+        <span class="note" style="--dx:-300px;--dy:-288px;--o:0.7;--s:0.85;--r:10deg;--d:0.35s;--w:34px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.4 3.1 20.1 1.4a.6.6 0 0 1 .7.6v2.6a.6.6 0 0 1-.5.6L9.3 6.7v9.1a3.2 3.2 0 1 1-1.5-2.5V3.7a.6.6 0 0 1 .6-.6z"/><path d="M19.3 5.5a.6.6 0 0 1 .8.6v7.6a3.2 3.2 0 1 1-1.5-2.5V6.1a.6.6 0 0 1 .7-.6z"/></svg></span></span>
+        <span class="note" style="--dx:-140px;--dy:-228px;--o:0.9;--s:1.05;--r:-8deg;--d:0.7s;--w:40px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2.6a.6.6 0 0 1 .95-.48c2.7 1.9 4.1 3.6 4.1 5.6 0 1.9-1.2 3.3-3 4.5v5.1a3.6 3.6 0 1 1-1.5-2.9V2.6zm1.5 7.8c1.1-.8 1.7-1.6 1.7-2.6 0-1-.5-1.9-1.7-3z"/></svg></span></span>
+        <span class="note" style="--dx:30px;--dy:-302px;--o:0.75;--s:0.8;--r:14deg;--d:0.15s;--w:32px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.2 3.3 18 1.5a.6.6 0 0 1 .75.58v3.1a.6.6 0 0 1-.45.58l-5.9 1.56v9.36a3.9 3.9 0 1 1-1.5-3.07V3.88a.6.6 0 0 1 .3-.58z"/></svg></span></span>
+        <span class="note" style="--dx:200px;--dy:-248px;--o:0.9;--s:1.0;--r:-12deg;--d:0.55s;--w:38px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.4 3.1 20.1 1.4a.6.6 0 0 1 .7.6v2.6a.6.6 0 0 1-.5.6L9.3 6.7v9.1a3.2 3.2 0 1 1-1.5-2.5V3.7a.6.6 0 0 1 .6-.6z"/><path d="M19.3 5.5a.6.6 0 0 1 .8.6v7.6a3.2 3.2 0 1 1-1.5-2.5V6.1a.6.6 0 0 1 .7-.6z"/></svg></span></span>
+        <span class="note" style="--dx:372px;--dy:-300px;--o:0.65;--s:0.8;--r:18deg;--d:0.9s;--w:33px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2.6a.6.6 0 0 1 .95-.48c2.7 1.9 4.1 3.6 4.1 5.6 0 1.9-1.2 3.3-3 4.5v5.1a3.6 3.6 0 1 1-1.5-2.9V2.6zm1.5 7.8c1.1-.8 1.7-1.6 1.7-2.6 0-1-.5-1.9-1.7-3z"/></svg></span></span>
+        <span class="note" style="--dx:492px;--dy:-206px;--o:0.85;--s:0.95;--r:-6deg;--d:0.25s;--w:36px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.2 3.3 18 1.5a.6.6 0 0 1 .75.58v3.1a.6.6 0 0 1-.45.58l-5.9 1.56v9.36a3.9 3.9 0 1 1-1.5-3.07V3.88a.6.6 0 0 1 .3-.58z"/></svg></span></span>
+        <span class="note" style="--dx:-566px;--dy:88px;--o:0.7;--s:0.85;--r:12deg;--d:0.6s;--w:34px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.4 3.1 20.1 1.4a.6.6 0 0 1 .7.6v2.6a.6.6 0 0 1-.5.6L9.3 6.7v9.1a3.2 3.2 0 1 1-1.5-2.5V3.7a.6.6 0 0 1 .6-.6z"/><path d="M19.3 5.5a.6.6 0 0 1 .8.6v7.6a3.2 3.2 0 1 1-1.5-2.5V6.1a.6.6 0 0 1 .7-.6z"/></svg></span></span>
+        <span class="note" style="--dx:640px;--dy:96px;--o:0.8;--s:0.9;--r:-14deg;--d:1.05s;--w:35px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2.6a.6.6 0 0 1 .95-.48c2.7 1.9 4.1 3.6 4.1 5.6 0 1.9-1.2 3.3-3 4.5v5.1a3.6 3.6 0 1 1-1.5-2.9V2.6zm1.5 7.8c1.1-.8 1.7-1.6 1.7-2.6 0-1-.5-1.9-1.7-3z"/></svg></span></span>
+        <span class="note" style="--dx:-330px;--dy:214px;--o:0.8;--s:0.9;--r:9deg;--d:0.45s;--w:35px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11.2 3.3 18 1.5a.6.6 0 0 1 .75.58v3.1a.6.6 0 0 1-.45.58l-5.9 1.56v9.36a3.9 3.9 0 1 1-1.5-3.07V3.88a.6.6 0 0 1 .3-.58z"/></svg></span></span>
+        <span class="note" style="--dx:300px;--dy:226px;--o:0.7;--s:0.85;--r:-10deg;--d:0.85s;--w:33px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.4 3.1 20.1 1.4a.6.6 0 0 1 .7.6v2.6a.6.6 0 0 1-.5.6L9.3 6.7v9.1a3.2 3.2 0 1 1-1.5-2.5V3.7a.6.6 0 0 1 .6-.6z"/><path d="M19.3 5.5a.6.6 0 0 1 .8.6v7.6a3.2 3.2 0 1 1-1.5-2.5V6.1a.6.6 0 0 1 .7-.6z"/></svg></span></span>
+        <span class="note" style="--dx:-46px;--dy:272px;--o:0.6;--s:0.75;--r:16deg;--d:1.2s;--w:30px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2.6a.6.6 0 0 1 .95-.48c2.7 1.9 4.1 3.6 4.1 5.6 0 1.9-1.2 3.3-3 4.5v5.1a3.6 3.6 0 1 1-1.5-2.9V2.6zm1.5 7.8c1.1-.8 1.7-1.6 1.7-2.6 0-1-.5-1.9-1.7-3z"/></svg></span></span>
+      </div>
+      <h1 class="headline"><span class="headline-line">Meet <span class="hero-spark" id="heroSpark">Étude</span>.</span><span class="headline-line">The fastest LLM inference on your Mac.</span></h1>
       <a href="download.html" class="cta-button">Download Now</a>
-      <p class="cta-subtitle">Free to use</p>
+      <p class="cta-subtitle">Local only</p>
     </div>
   </div>
 
@@ -675,6 +909,67 @@
       }, { threshold: 0.25 });
 
       targets.forEach(function(el) { io.observe(el); });
+    })();
+  </script>
+
+  <button class="theme-toggle" id="themeToggle" type="button"
+          aria-label="Switch between light and dark" title="Light / dark">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.7" stroke-linecap="round">
+      <circle cx="12" cy="12" r="4.2"></circle>
+      <path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"></path>
+    </svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.2 8.2 0 1 0 10.2 10.2z"></path>
+    </svg>
+  </button>
+
+  <script>
+    // ---- theme -------------------------------------------------------------
+    // The stored choice is applied by an inline script in <head> so the page
+    // never paints light and then flips. This half only wires the button.
+    (function() {
+      var btn = document.getElementById('themeToggle');
+      if (!btn) return;
+      btn.addEventListener('click', function() {
+        var root = document.documentElement;
+        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('etude-theme', next); } catch (e) {}
+        document.dispatchEvent(new CustomEvent('etude:theme', { detail: next }));
+      });
+    })();
+  </script>
+
+  <script>
+    // Notes scatter out of "Étude" on hover and retract on leave. Bound to
+    // the word, but the class goes on .hero-content because that's what the
+    // note layer is positioned against.
+    (function() {
+      var word = document.getElementById('heroSpark');
+      var host = word && word.closest('.hero-content');
+      if (!word || !host) return;
+
+      var notes = [].slice.call(host.querySelectorAll('.note'));
+
+      function show(on) {
+        host.classList.toggle('notes-on', on);
+        // Stagger outward from the word and unwind in reverse on the way
+        // back, so they retract in the order they appeared.
+        notes.forEach(function(n, i) {
+          var step = on ? i : (notes.length - 1 - i);
+          // tighter on the way back — the full 32ms cascade in reverse read
+          // as the notes dribbling away one at a time
+          n.style.transitionDelay = (step * (on ? 0.032 : 0.012)) + 's';
+        });
+      }
+
+      word.addEventListener('mouseenter', function() { show(true); });
+      word.addEventListener('mouseleave', function() { show(false); });
+      // keyboard and touch get the same thing without a pointer
+      word.addEventListener('focus', function() { show(true); });
+      word.addEventListener('blur', function() { show(false); });
     })();
   </script>
 
