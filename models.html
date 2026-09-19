@@ -286,9 +286,11 @@
     color: var(--ink);
     text-decoration: none;
     white-space: nowrap;
+    transition: color 0.18s ease, background 0.18s ease;
   }
   .nav-menu a:hover {
     background: var(--surface);
+    color: rgb(var(--net));
   }
   .nav-indicator {
     position: absolute;
@@ -309,8 +311,9 @@
     padding: 10px 0;
     transition: color 0.2s ease;
   }
-  .nav-link:hover {
-    color: var(--ink);
+  .nav-link:hover,
+  .nav-link.active:hover {
+    color: rgb(var(--net));
   }
   .nav-link.active {
     color: var(--ink);
@@ -354,7 +357,8 @@
     transition: transform 0.5s cubic-bezier(0.34, 1.7, 0.5, 1),
                 background 0.35s ease,
                 box-shadow 0.35s ease,
-                border-color 0.35s ease;
+                border-color 0.35s ease,
+                color 0.35s ease;
   }
   /* specular streak — parked off the left edge, sweeps across on hover */
   .download-link::before {
@@ -397,21 +401,22 @@
   }
   .download-link:hover {
     transform: translateY(-2px) scale(1.04);
-    border-color: rgba(255, 255, 255, 0.26);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.34);
     background:
       linear-gradient(168deg,
-        rgba(255, 255, 255, 0.28) 0%,
-        rgba(255, 255, 255, 0.08) 46%,
+        rgba(255, 255, 255, 0.30) 0%,
+        rgba(255, 255, 255, 0.09) 46%,
         rgba(255, 255, 255, 0) 62%),
-      var(--ink-glass-hover);
+      rgba(var(--net), 0.95);
     backdrop-filter: blur(18px) saturate(220%);
     -webkit-backdrop-filter: blur(18px) saturate(220%);
     box-shadow:
-      0 1px 2px rgba(11, 11, 13, 0.12),
-      0 6px 16px rgba(11, 11, 13, 0.16),
-      inset 0 1px 0 rgba(255, 255, 255, 0.45),
-      inset 0 -2px 4px -2px rgba(0, 0, 0, 0.55),
-      inset 0 0 18px rgba(255, 255, 255, 0.09);
+      0 1px 2px rgba(var(--net), 0.24),
+      0 8px 20px rgba(var(--net), 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.55),
+      inset 0 -2px 4px -2px rgba(11, 11, 13, 0.35),
+      inset 0 0 18px rgba(255, 255, 255, 0.12);
   }
   .download-link:hover::before {
     transform: translateX(130%);
@@ -440,14 +445,28 @@
 
   .models-page {
     width: 100%;
-    padding: 56px 30px 100px;
+    padding: 56px 30px 110px;
+  }
+  @keyframes row-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .model-card {
+    animation: row-in 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+  .model-card:nth-child(2) { animation-delay: 0.07s; }
+  .model-card:nth-child(3) { animation-delay: 0.14s; }
+  .model-card:nth-child(4) { animation-delay: 0.21s; }
+  @media (prefers-reduced-motion: reduce) {
+    .model-card { animation: none; }
   }
   .models-heading {
     font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
     font-size: 34px;
     font-weight: 600;
     color: var(--ink);
-    margin: 0 0 32px 62px;
+    max-width: 960px;
+    margin: 0 auto 36px;
     text-align: left;
   }
   .models-heading-sub {
@@ -455,190 +474,36 @@
     font-weight: 400;
     margin-left: 14px;
   }
-  .filter-tabs {
-    margin-left: 62px;
+  /* Four models, four rows. The page scrolls vertically like anywhere
+     else — the carousel, its arrows and the category filters are gone
+     (four items don't need filtering). */
+  .models-list {
+    max-width: 960px;
+    margin: 0 auto;
     display: flex;
-    justify-content: flex-start;
-    gap: 10px;
-    padding: 6px 0 14px;
-    margin-bottom: 40px;
-  }
-  /* liquid-glass filter tabs — the pane is a translucent brand blue (the page
-     is white, so white-on-white glass wouldn't read), with the usual white
-     rim and inner glow catching the light. */
-  .filter-tab {
-    font-family: inherit;
-    font-size: 15px;
-    font-weight: 400;
-    color: var(--ink-2);
-    background: none;
-    border: 1px solid transparent;
-    padding: 9px 20px;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: background 0.25s ease,
-                color 0.25s ease,
-                border-color 0.25s ease,
-                box-shadow 0.25s ease,
-                transform 0.4s cubic-bezier(0.34, 1.7, 0.5, 1);
-  }
-  .filter-tab:hover {
-    color: var(--ink);
-    background: var(--glass-fill);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-color: var(--glass-rim);
-    box-shadow: var(--glass-lift), var(--glass-lip);
-  }
-  .filter-tab.active {
-    color: var(--ink-glass-fg);
-    background: var(--ink-glass);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-color: rgba(255, 255, 255, 0.14);
-    box-shadow: 0 1px 3px rgba(11, 11, 13, 0.14),
-                0 8px 20px rgba(11, 11, 13, 0.16),
-                inset 0 1px 0 rgba(255, 255, 255, 0.24);
-  }
-  .filter-tab.active:hover {
-    background: var(--ink-glass-hover);
-    color: var(--ink-glass-fg);
-    box-shadow: 0 2px 5px rgba(11, 11, 13, 0.16),
-                0 12px 28px rgba(11, 11, 13, 0.20),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  }
-  .filter-tab:active {
-    transform: scale(0.96);
-    transition: transform 0.11s ease-out;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .filter-tab:active {
-      transform: none;
-    }
-  }
-  .models-grid {
-    display: flex;
-    flex-direction: row;
-    gap: 24px;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    /* overflow-x: auto forces overflow-y to compute as auto too, so this box
-       clips vertically. The 4px of top padding was less than the 6px hover
-       lift, which sheared the top border and the corner radius clean off the
-       hovered card and swallowed its upward shadow. Padded out to clear both
-       the lift and the shadow's 22px upward reach, then pulled back by the
-       same amount with negative margins so nothing in the layout moves — and
-       symmetrically, so the arrows stay centred on the row. */
-    padding: 30px 0 42px;
-    margin: -26px 0 -26px;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  .models-grid::-webkit-scrollbar {
-    display: none;
-  }
-  .carousel-wrap {
-    position: relative;
-    /* Same width as before (100vw - 122px), but split evenly left/right
-       so the row is centered rather than sitting flush to the right edge. */
-    margin-left: 31px;
-    margin-right: 31px;
-  }
-  .scroll-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background:
-      linear-gradient(165deg, var(--sheen) 0%, var(--sheen-soft) 42%,
-                      rgba(255, 255, 255, 0) 60%),
-      var(--pane);
-    backdrop-filter: blur(16px) saturate(190%);
-    -webkit-backdrop-filter: blur(16px) saturate(190%);
-    border: 1px solid var(--glass-rim);
-    color: var(--ink);
-    box-shadow:
-      0 1px 2px rgba(11, 11, 13, 0.05),
-      0 4px 14px rgba(11, 11, 13, 0.07),
-      inset 0 1px 0 rgba(255, 255, 255, 0.95),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 5;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease, background 0.25s ease,
-                border-color 0.25s ease, box-shadow 0.25s ease;
-  }
-  .scroll-arrow::after {
-    content: "";
-    position: absolute;
-    inset: -1px;
-    border-radius: 50%;
-    padding: 1px;
-    background: linear-gradient(150deg,
-      rgba(255, 255, 255, 1) 0%,
-      rgba(255, 255, 255, 0.2) 40%,
-      rgba(11, 11, 13, 0.06) 70%,
-      rgba(11, 11, 13, 0.16) 100%);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-  .scroll-arrow.visible {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  .scroll-arrow:hover {
-    background:
-      linear-gradient(165deg, var(--sheen) 0%, var(--sheen-soft) 42%,
-                      rgba(255, 255, 255, 0) 60%),
-      var(--pane-hover);
-    border-color: var(--glass-rim-hover);
-    box-shadow:
-      0 1px 2px rgba(11, 11, 13, 0.06),
-      0 7px 20px rgba(11, 11, 13, 0.10),
-      inset 0 1px 0 rgba(255, 255, 255, 1),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.55);
-  }
-  .scroll-arrow-left {
-    left: 16px;
-  }
-  .scroll-arrow-right {
-    right: 16px;
-  }
-  .scroll-arrow svg {
-    width: 18px;
-    height: 18px;
+    flex-direction: column;
+    gap: 26px;
   }
   .model-card {
+    display: flex;
+    align-items: stretch;
+    gap: 34px;
+    padding: 26px;
     background: var(--bg);
-    border-radius: 16px;
+    border-radius: 20px;
     border: 1px solid var(--line);
     box-shadow: 0 1px 2px rgba(11, 11, 13, 0.04),
                 0 6px 18px rgba(11, 11, 13, 0.05);
-    padding: 26px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .model-card-body {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    /* Narrower, taller cards — sized so ~5 fit across the full-bleed row:
-       100vw minus the row's 80px side padding and the 4 gaps between cards. */
-    width: calc((100vw - 218px) / 5);
-    min-width: 250px;
-    max-width: 330px;
-    min-height: 520px;
-    flex-shrink: 0;
-    scroll-snap-align: start;
+    min-width: 0;
+    padding: 8px 6px 4px 0;
   }
   .model-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-4px);
     /* has to be DARKER than the resting --line, not lighter — a white card
        on a white page has nothing but its outline holding the edge, and the
        old --glass-rim (0.10) was paler than --line, so the hovered card
@@ -648,16 +513,17 @@
                 0 18px 40px rgba(11, 11, 13, 0.15);
   }
   .model-card-art {
-    width: 100%;
-    height: 210px;
-    border-radius: 12px;
-    margin-bottom: 14px;
+    flex: 0 0 232px;
+    height: auto;
+    min-height: 232px;
+    border-radius: 14px;
   }
   .model-card-name {
     font-family: "Cabinet Grotesk", "Inter", "Helvetica Neue", Arial, sans-serif;
-    font-size: 22px;
+    font-size: 30px;
     font-weight: 700;
     color: var(--ink);
+    margin-top: 4px;
   }
   .model-card-meta {
     font-size: 14px;
@@ -668,10 +534,11 @@
   }
   .model-card-desc {
     font-family: "Cabinet Grotesk", "Inter", "Helvetica Neue", Arial, sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
+    font-size: 17px;
+    line-height: 1.55;
     color: var(--ink-2);
-    margin-top: 6px;
+    margin-top: 10px;
+    max-width: 520px;
   }
   .model-card-size {
     margin-top: 16px;
@@ -682,9 +549,20 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 10px;
     margin-top: auto;
-    padding-top: 20px;
+    padding-top: 22px;
+  }
+  @media (max-width: 760px) {
+    .model-card {
+      flex-direction: column;
+      gap: 18px;
+    }
+    .model-card-art {
+      flex: none;
+      width: 100%;
+      min-height: 180px;
+    }
   }
   /* glass card actions — same blue-tinted pane as the filter tabs, since the
      cards sit on white. "Learn more" is the quieter, near-clear variant. */
@@ -824,242 +702,63 @@
   </script>
   <div class="models-page">
     <h1 class="models-heading">Models Available<span class="models-heading-sub">for Every Occasion</span></h1>
-    <div class="filter-tabs">
-      <button class="filter-tab active" data-filter="all">All Models Supported</button>
-      <button class="filter-tab" data-filter="general">General Purpose</button>
-      <button class="filter-tab" data-filter="code">Code</button>
-      <button class="filter-tab" data-filter="vision">Vision</button>
-      <button class="filter-tab" data-filter="compact">Compact</button>
-    </div>
-    <div class="carousel-wrap">
-      <button class="scroll-arrow scroll-arrow-left" id="scrollLeftBtn" aria-label="Scroll left">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="models-grid" id="modelsGrid">
+    <div class="models-list">
       <div class="model-card" data-category="general">
         <div class="model-card-art" style="background:linear-gradient(135deg, #2f2f33, #6e6e73);"></div>
-        <div class="model-card-meta">Meta</div>
-        <div class="model-card-name">Llama 3.1</div>
-        <div class="model-card-desc">General-purpose open-weight model, strong at reasoning and coding tasks.</div>
-        <div class="model-card-size">8B / 70B / 405B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      <div class="model-card" data-category="general">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #6e6e73, #2f2f33);"></div>
-        <div class="model-card-meta">Mistral AI</div>
-        <div class="model-card-name">Mixtral 8x7B</div>
-        <div class="model-card-desc">Sparse mixture-of-experts model balancing speed and quality.</div>
-        <div class="model-card-size">46.7B (MoE)</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      <div class="model-card" data-category="general">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #8e8e93, #3a3a3e);"></div>
-        <div class="model-card-meta">Alibaba</div>
-        <div class="model-card-name">Qwen2</div>
-        <div class="model-card-desc">Multilingual model with strong performance across benchmarks.</div>
-        <div class="model-card-size">7B / 72B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      <div class="model-card" data-category="general">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #3a3a3e, #131316);"></div>
-        <div class="model-card-meta">Cohere</div>
-        <div class="model-card-name">Command R</div>
-        <div class="model-card-desc">Tuned for retrieval-augmented generation and tool use.</div>
-        <div class="model-card-size">35B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      <div class="model-card" data-category="general">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #5a5a5f, #1d1d1f);"></div>
-        <div class="model-card-meta">TII</div>
-        <div class="model-card-name">Falcon 180B</div>
-        <div class="model-card-desc">Large-scale open model trained on a curated web corpus.</div>
-        <div class="model-card-size">180B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      <div class="model-card" data-category="general">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #2f2f33, #6e6e73);"></div>
-        <div class="model-card-meta">01.AI</div>
-        <div class="model-card-name">Yi-34B</div>
-        <div class="model-card-desc">Bilingual English/Chinese model with long-context support.</div>
-        <div class="model-card-size">34B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      <div class="model-card" data-category="general">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #1d1d1f, #55555a);"></div>
-        <div class="model-card-meta">LMSYS</div>
-        <div class="model-card-name">Vicuna</div>
-        <div class="model-card-desc">Fine-tuned conversational model built on open base weights.</div>
-        <div class="model-card-size">7B / 13B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
+        <div class="model-card-body">
+          <div class="model-card-meta">Meta &middot; General purpose</div>
+          <div class="model-card-name">Llama 3.1</div>
+          <div class="model-card-desc">General-purpose open-weight model, strong at reasoning and coding tasks.</div>
+          <div class="model-card-size">8B / 70B / 405B</div>
+          <div class="model-card-actions">
+            <a href="#" class="btn-learn">Learn more</a>
+            <a href="download.html" class="btn-download">Download</a>
+          </div>
         </div>
       </div>
       <div class="model-card" data-category="code">
         <div class="model-card-art" style="background:linear-gradient(135deg, #9a9aa0, #55555a);"></div>
-        <div class="model-card-meta">DeepSeek</div>
-        <div class="model-card-name">DeepSeek-V2</div>
-        <div class="model-card-desc">Efficient mixture-of-experts model for coding and reasoning.</div>
-        <div class="model-card-size">236B (MoE)</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      <div class="model-card" data-category="code">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #55555a, #a8a8ad);"></div>
-        <div class="model-card-meta">Meta</div>
-        <div class="model-card-name">Code Llama</div>
-        <div class="model-card-desc">Llama fine-tuned specifically for code generation and completion.</div>
-        <div class="model-card-size">7B / 13B / 34B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      <div class="model-card" data-category="code">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #a8a8ad, #7c7c81);"></div>
-        <div class="model-card-meta">BigCode</div>
-        <div class="model-card-name">StarCoder2</div>
-        <div class="model-card-desc">Trained on permissively-licensed source code across 600+ languages.</div>
-        <div class="model-card-size">3B / 7B / 15B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      <div class="model-card" data-category="vision">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #d2d2d7, #86868b);"></div>
-        <div class="model-card-meta">LMSYS</div>
-        <div class="model-card-name">LLaVA</div>
-        <div class="model-card-desc">Multimodal model connecting a vision encoder to an LLM for image understanding.</div>
-        <div class="model-card-size">7B / 13B / 34B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
+        <div class="model-card-body">
+          <div class="model-card-meta">DeepSeek &middot; Code</div>
+          <div class="model-card-name">DeepSeek-V2</div>
+          <div class="model-card-desc">Efficient mixture-of-experts model for coding and reasoning.</div>
+          <div class="model-card-size">236B (MoE)</div>
+          <div class="model-card-actions">
+            <a href="#" class="btn-learn">Learn more</a>
+            <a href="download.html" class="btn-download">Download</a>
+          </div>
         </div>
       </div>
       <div class="model-card" data-category="vision">
         <div class="model-card-art" style="background:linear-gradient(135deg, #86868b, #c8c8cd);"></div>
-        <div class="model-card-meta">Alibaba</div>
-        <div class="model-card-name">Qwen2-VL</div>
-        <div class="model-card-desc">Vision-language model for image and video understanding tasks.</div>
-        <div class="model-card-size">2B / 7B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
+        <div class="model-card-body">
+          <div class="model-card-meta">Alibaba &middot; Vision</div>
+          <div class="model-card-name">Qwen2-VL</div>
+          <div class="model-card-desc">Vision-language model for image and video understanding tasks.</div>
+          <div class="model-card-size">2B / 7B</div>
+          <div class="model-card-actions">
+            <a href="#" class="btn-learn">Learn more</a>
+            <a href="download.html" class="btn-download">Download</a>
+          </div>
         </div>
       </div>
       <div class="model-card" data-category="compact">
         <div class="model-card-art" style="background:linear-gradient(135deg, #1d1d1f, #48484c);"></div>
-        <div class="model-card-meta">Mistral AI</div>
-        <div class="model-card-name">Mistral 7B</div>
-        <div class="model-card-desc">Compact, fast model tuned for efficient local inference.</div>
-        <div class="model-card-size">7B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
+        <div class="model-card-body">
+          <div class="model-card-meta">Mistral AI &middot; Compact</div>
+          <div class="model-card-name">Mistral 7B</div>
+          <div class="model-card-desc">Compact, fast model tuned for efficient local inference.</div>
+          <div class="model-card-size">7B</div>
+          <div class="model-card-actions">
+            <a href="#" class="btn-learn">Learn more</a>
+            <a href="download.html" class="btn-download">Download</a>
+          </div>
         </div>
       </div>
-      <div class="model-card" data-category="compact">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #48484c, #1d1d1f);"></div>
-        <div class="model-card-meta">Google</div>
-        <div class="model-card-name">Gemma 2</div>
-        <div class="model-card-desc">Lightweight model family built from the same research as Gemini.</div>
-        <div class="model-card-size">9B / 27B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      <div class="model-card" data-category="compact">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #131316, #3a3a3e);"></div>
-        <div class="model-card-meta">Microsoft</div>
-        <div class="model-card-name">Phi-3</div>
-        <div class="model-card-desc">Small model optimized for reasoning given its size.</div>
-        <div class="model-card-size">3.8B / 14B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      <div class="model-card" data-category="compact">
-        <div class="model-card-art" style="background:linear-gradient(135deg, #3a3a3e, #0b0b0d);"></div>
-        <div class="model-card-meta">Stability AI</div>
-        <div class="model-card-name">StableLM 2</div>
-        <div class="model-card-desc">Compact models designed for on-device deployment.</div>
-        <div class="model-card-size">1.6B / 12B</div>
-        <div class="model-card-actions">
-          <a href="#" class="btn-learn">Learn more</a>
-          <a href="download.html" class="btn-download">Download</a>
-        </div>
-      </div>
-      </div>
-      <button class="scroll-arrow scroll-arrow-right" id="scrollRightBtn" aria-label="Scroll right">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
     </div>
   </div>
 
-  <script>
-    (function() {
-      var tabs = document.querySelectorAll('.filter-tab');
-      var cards = document.querySelectorAll('.model-card');
-      tabs.forEach(function(tab) {
-        tab.addEventListener('click', function() {
-          tabs.forEach(function(t) { t.classList.remove('active'); });
-          tab.classList.add('active');
-          var filter = tab.getAttribute('data-filter');
-          cards.forEach(function(card) {
-            var match = filter === 'all' || card.getAttribute('data-category') === filter;
-            card.style.display = match ? '' : 'none';
-          });
-          updateArrows();
-        });
-      });
 
-      var grid = document.getElementById('modelsGrid');
-      var leftBtn = document.getElementById('scrollLeftBtn');
-      var rightBtn = document.getElementById('scrollRightBtn');
-
-      function updateArrows() {
-        if (!grid) return;
-        var maxScroll = grid.scrollWidth - grid.clientWidth;
-        leftBtn.classList.toggle('visible', grid.scrollLeft > 4);
-        rightBtn.classList.toggle('visible', grid.scrollLeft < maxScroll - 4);
-      }
-
-      if (grid) {
-        grid.addEventListener('scroll', updateArrows, { passive: true });
-        window.addEventListener('resize', updateArrows);
-        leftBtn.addEventListener('click', function() {
-          grid.scrollBy({ left: -grid.clientWidth * 0.8, behavior: 'smooth' });
-        });
-        rightBtn.addEventListener('click', function() {
-          grid.scrollBy({ left: grid.clientWidth * 0.8, behavior: 'smooth' });
-        });
-        updateArrows();
-      }
-    })();
-  </script>
 
 
   <button class="theme-toggle" id="themeToggle" type="button"

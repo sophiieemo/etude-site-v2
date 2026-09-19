@@ -1,0 +1,108 @@
+<!-- Archived "Stay Connected" section (heading, email bar, social icons) from community.html -->
+
+<style>
+  .connect-section {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 90px 24px 100px;
+    text-align: center;
+  }
+  .connect-heading {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+    font-size: 38px;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin: 0 0 32px;
+  }
+  .email-box {
+    display: flex;
+    align-items: stretch;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .email-input {
+    flex: 1;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
+    font-size: 16px;
+    color: #1a1a1a;
+    padding: 15px 22px;
+    background: #f1f1f3;
+    border: 1px solid #e6e6e9;
+    border-right: none;
+    border-radius: 16px 0 0 16px;
+    outline: none;
+  }
+  .email-input::placeholder {
+    color: #9a9aa2;
+  }
+  .email-input:focus {
+    border-color: #d8d8de;
+    background: #ececef;
+  }
+  .email-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 58px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #6b9eff, #2161e6);
+    border: none;
+    border-radius: 0 16px 16px 0;
+    cursor: pointer;
+  }
+  .email-submit:hover {
+    background: linear-gradient(135deg, #7fabff, #3a75ea);
+  }
+  .email-submit svg {
+    width: 20px;
+    height: 20px;
+  }
+  .social-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 40px;
+  }
+  .social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #f4f6f8;
+    color: #1a1a1a;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .social-icon:hover {
+    background: #e7ebef;
+    transform: translateY(-2px);
+  }
+  .social-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+</style>
+
+  <div class="connect-section">
+    <h1 class="connect-heading">Stay Connected</h1>
+    <div class="email-box">
+      <input type="email" class="email-input" placeholder="Enter your email">
+      <button type="button" class="email-submit" aria-label="Subscribe">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div class="social-row">
+      <a href="#" class="social-icon" aria-label="GitHub">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.5 0 12.3c0 5.44 3.44 10.05 8.21 11.68.6.11.82-.27.82-.6 0-.3-.01-1.09-.02-2.14-3.34.75-4.04-1.66-4.04-1.66-.55-1.43-1.34-1.82-1.34-1.82-1.09-.77.08-.75.08-.75 1.21.09 1.85 1.28 1.85 1.28 1.07 1.87 2.81 1.33 3.5 1.02.11-.79.42-1.33.76-1.64-2.67-.31-5.47-1.38-5.47-6.14 0-1.36.47-2.46 1.24-3.33-.12-.31-.54-1.57.12-3.28 0 0 1.01-.33 3.3 1.27a11.3 11.3 0 0 1 3.01-.41c1.02.01 2.05.14 3.01.41 2.29-1.6 3.3-1.27 3.3-1.27.66 1.71.24 2.97.12 3.28.77.87 1.24 1.97 1.24 3.33 0 4.77-2.81 5.82-5.49 6.13.43.38.81 1.13.81 2.28 0 1.65-.02 2.97-.02 3.38 0 .33.22.72.83.6C20.57 22.34 24 17.74 24 12.3 24 5.5 18.63 0 12 0Z"/></svg>
+      </a>
+      <a href="#" class="social-icon" aria-label="Discord">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.32 4.37a19.8 19.8 0 0 0-4.89-1.52.07.07 0 0 0-.08.04c-.21.38-.45.87-.61 1.26a18.3 18.3 0 0 0-5.48 0 12.6 12.6 0 0 0-.62-1.26.08.08 0 0 0-.08-.04c-1.7.29-3.33.8-4.89 1.52a.07.07 0 0 0-.03.03C.53 9.05-.32 13.58.1 18.06a.08.08 0 0 0 .03.06 19.9 19.9 0 0 0 6 3.03.08.08 0 0 0 .08-.03c.46-.63.87-1.3 1.23-2a.08.08 0 0 0-.04-.11 13.1 13.1 0 0 1-1.87-.89.08.08 0 0 1-.01-.13c.13-.09.25-.19.37-.28a.07.07 0 0 1 .08-.01c3.93 1.79 8.18 1.79 12.06 0a.07.07 0 0 1 .08.01c.12.1.24.19.37.28a.08.08 0 0 1-.01.13c-.6.35-1.22.64-1.87.89a.08.08 0 0 0-.04.11c.36.7.78 1.37 1.23 2a.08.08 0 0 0 .08.03 19.85 19.85 0 0 0 6.01-3.03.08.08 0 0 0 .03-.06c.5-5.18-.83-9.66-3.51-13.66a.06.06 0 0 0-.03-.03ZM8.02 15.33c-1.18 0-2.15-1.08-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.21 0 2.17 1.1 2.15 2.42 0 1.34-.95 2.42-2.15 2.42Zm7.97 0c-1.18 0-2.15-1.08-2.15-2.42 0-1.33.95-2.42 2.15-2.42 1.21 0 2.17 1.1 2.15 2.42 0 1.34-.94 2.42-2.15 2.42Z"/></svg>
+      </a>
+      <a href="#" class="social-icon" aria-label="X">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.68L23.4 22h-7.1l-5.5-7.2L4.5 22H1.4l8.1-9.28L.9 2h7.3l5 6.6L18.9 2Zm-1.24 18h1.72L6.4 3.9H4.55L17.66 20Z"/></svg>
+      </a>
+    </div>
+  </div>
+

@@ -1,0 +1,142 @@
+<!-- "Glittery" design: interactive dot-sphere that parts and brightens under the cursor.
+     Saved from community.html for possible reuse. -->
+
+<style>
+  .orb-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 24px 0;
+  }
+  #dotOrb {
+    display: block;
+    width: 460px;
+    height: 460px;
+    max-width: 86vw;
+    max-height: 86vw;
+    cursor: crosshair;
+  }
+
+</style>
+
+  <div class="orb-section">
+    <canvas id="dotOrb" width="920" height="920"></canvas>
+  </div>
+
+
+  <script>
+    (function() {
+      var canvas = document.getElementById('dotOrb');
+      if (!canvas || !canvas.getContext) return;
+      var ctx = canvas.getContext('2d');
+      var W = canvas.width, H = canvas.height;
+      var CX = W / 2, CY = H / 2;
+      var R = Math.min(W, H) * 0.42;
+
+      var reduceMotion = window.matchMedia &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Distribute points evenly over a sphere (Fibonacci spiral).
+      var COUNT = 1100;
+      var pts = [];
+      var golden = Math.PI * (3 - Math.sqrt(5));
+      for (var i = 0; i < COUNT; i++) {
+        var y = 1 - (i / (COUNT - 1)) * 2;      // 1 -> -1
+        var r = Math.sqrt(Math.max(0, 1 - y * y));
+        var theta = golden * i;
+        pts.push({
+          x: Math.cos(theta) * r,
+          y: y,
+          z: Math.sin(theta) * r,
+          ox: 0, oy: 0,          // current push offset
+          glow: 0                // 0..1 highlight amount
+        });
+      }
+
+      var rot = 0;
+      var mouse = { x: -9999, y: -9999, active: false };
+      var INFLUENCE = R * 0.55;   // cursor reach
+
+      function toCanvas(e) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+          x: (e.clientX - rect.left) * (W / rect.width),
+          y: (e.clientY - rect.top) * (H / rect.height)
+        };
+      }
+
+      canvas.addEventListener('mousemove', function(e) {
+        var p = toCanvas(e);
+        mouse.x = p.x; mouse.y = p.y; mouse.active = true;
+      });
+      canvas.addEventListener('mouseleave', function() {
+        mouse.active = false;
+        mouse.x = mouse.y = -9999;
+      });
+      canvas.addEventListener('touchmove', function(e) {
+        if (!e.touches.length) return;
+        var p = toCanvas(e.touches[0]);
+        mouse.x = p.x; mouse.y = p.y; mouse.active = true;
+      }, { passive: true });
+      canvas.addEventListener('touchend', function() { mouse.active = false; });
+
+      function frame() {
+        ctx.clearRect(0, 0, W, H);
+        if (!reduceMotion) rot += 0.0016;
+
+        var cos = Math.cos(rot), sin = Math.sin(rot);
+
+        for (var i = 0; i < pts.length; i++) {
+          var p = pts[i];
+          // rotate around the Y axis
+          var rx = p.x * cos - p.z * sin;
+          var rz = p.x * sin + p.z * cos;
+
+          var sx = CX + rx * R;
+          var sy = CY + p.y * R;
+          var depth = (rz + 1) / 2;              // 0 (back) .. 1 (front)
+
+          // cursor influence — push dots away and light them up
+          var targetGlow = 0, pushX = 0, pushY = 0;
+          if (mouse.active) {
+            var dx = sx - mouse.x, dy = sy - mouse.y;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < INFLUENCE) {
+              var f = 1 - dist / INFLUENCE;      // 0..1, strongest at cursor
+              targetGlow = f;
+              var push = f * f * 26;
+              if (dist > 0.001) {
+                pushX = (dx / dist) * push;
+                pushY = (dy / dist) * push;
+              }
+            }
+          }
+
+          // ease toward target so motion feels fluid, not jumpy
+          p.glow += (targetGlow - p.glow) * 0.12;
+          p.ox += (pushX - p.ox) * 0.12;
+          p.oy += (pushY - p.oy) * 0.12;
+
+          var x = sx + p.ox;
+          var y = sy + p.oy;
+
+          var size = (1.4 + depth * 2.2) + p.glow * 3.2;
+          var alpha = (0.22 + depth * 0.5) + p.glow * 0.4;
+
+          // brand blue, brightening toward the cursor
+          var rr = Math.round(33 + p.glow * 74);
+          var gg = Math.round(97 + p.glow * 61);
+          var bb = Math.round(230 + p.glow * 25);
+
+          ctx.beginPath();
+          ctx.arc(x, y, size, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(' + rr + ',' + gg + ',' + bb + ',' + Math.min(1, alpha) + ')';
+          ctx.fill();
+        }
+
+        requestAnimationFrame(frame);
+      }
+
+      frame();
+    })();
+  </script>
