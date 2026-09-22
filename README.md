@@ -163,15 +163,22 @@ can't fight a pale pane; on black it only needs to suggest.
 
 - **index** — sections blur/fade in *once* via IntersectionObserver, then
   stay clear (no scroll-linked blur; all damping/snapping was removed).
-  Hero is two block `.headline-line` spans — "Meet Étude." / "The fastest
-  LLM inference on your Mac." — at a display leading of 1.1, dropping to
-  44px under 900px wide. The two scroll sections centre their text/image
+  Hero is a headline + subline pair: "Meet Étude." at
+  `clamp(38px, 5vw, 72px)`, then `.headline-sub` — "LLM on your MacBook:
+  run by you, stays with you" — at `clamp(19px, 2.1vw, 30px)`, weight 400,
+  `--ink-2`. The long line has to be a subline: at headline size it
+  out-measures "Meet Étude." three to one and wraps on anything under
+  ~1450px. Under 900px the note ring has no clear band left and retires
+  entirely (`display: none` on `.note-field`) — the word still inks blue. The two scroll sections centre their text/image
   pair as a unit with a `clamp()`ed gap rather than pushing them to the
   band's edges, so the copy reads nearer the middle of the screen.
   Placeholder collage cards are greyscale gradients.
 
-  Hovering "Étude" in the headline inks the word `--net` blue and scatters
-  twelve music notes out around the hero, which retract on leave. The notes
+  Hovering "Étude" in the headline — or the **Download Now** button — inks
+  the word `--net` blue and scatters twelve music notes out around the hero,
+  which retract on leave. The two triggers share one note field, so hiding
+  waits 130ms: travelling between the word and the button would otherwise
+  start a retract in the gap and pop straight back out. The notes
   live in a `.note-field` layer over `.hero-content`, not inside the `<h1>`,
   so they can travel outside the text box without touching its layout. Each
   carries its own `--dx/--dy/--o/--s/--r/--w` and a stagger; leaving unwinds
@@ -264,6 +271,59 @@ can't fight a pale pane; on black it only needs to suggest.
   silver, compact near-black. On hover a row's `border-color` must go
   *darker* than the resting `--line`, not lighter — a white card on a white
   page has nothing but its outline holding the edge.
+
+### Text editor (index only)
+
+**The editor is a workbench tool, not part of the site.** It only wires up
+when the page is opened from disk (`file:`) or a local server (localhost /
+127.x), or when `?edit` is added to the URL as an escape hatch; anywhere
+else — github.io included — the pencil, grip and toolbar are removed from
+the DOM before anything runs. So the deployed site ships the editor code
+but never shows it, and `https://…/index.html?edit` turns it on in a pinch.
+
+The pencil above the theme toggle turns on edit mode. Seven text blocks are
+marked with `data-edit` ids — the hero title, hero subline, button caption,
+and both scroll sections' titles and subtitles. Click one: it becomes
+`contenteditable` in place, drags by the blue grip above it, and the glass
+toolbar at the bottom sets size, colour (four token swatches + a custom
+picker), position (arrow nudges, Shift for 10px), and a Style group
+(bold / italic / underline / clear).
+
+Colour and Style are selection-aware: highlight a run of text inside the
+box and they act on those words only (the toolbar label shows
+"(selection)"); with nothing highlighted they act on the whole box. Word
+styling rides on `document.execCommand` with `styleWithCSS`, with three
+supporting tricks: toolbar `mousedown` is prevented so clicking a control
+doesn't collapse the highlight; the box flips from `plaintext-only` to
+rich `contenteditable` just for the instant a command runs (plaintext-only
+silently disables every formatting command); and token colours like
+`var(--ink)` — which execCommand rejects — go on via a sentinel colour
+that's swapped for the token afterwards, so word colours stay theme-aware.
+Word spans persist through the same saved-innerHTML path as text edits,
+and "Clear" (`removeFormat`) strips them from a selection. Links don't navigate
+while edit mode is on, and the hero note burst is suppressed.
+
+Edits live in `localStorage` under `etude-edits`, **this browser only** —
+visitors to the deployed site never see them. The workflow is: tweak, hit
+**Copy changes** (the full edit set as JSON goes on the clipboard), paste it
+back to have the changes baked into the file. "Reset this" / "Reset all"
+restore the originals, which are captured at load before saved edits apply.
+
+Two rules the implementation depends on:
+
+1. The toolbar's visibility follows **edit mode**, not the selection —
+   otherwise the global actions (Copy / Reset all / Done) go unreachable the
+   moment nothing is selected, and Reset All strands you in edit mode.
+2. The hero note triggers are **delegated** (`mouseover`/`mouseout` on
+   `document` matching `#heroSpark, .cta-button`), not bound to the nodes:
+   resetting an edited headline rebuilds its innerHTML, which destroys and
+   recreates the `#heroSpark` span, and direct listeners die with the old
+   node.
+
+Setting a size overrides the responsive `clamp()` with a fixed px value, and
+a custom hex colour ignores the theme (the swatches use tokens and follow
+it). Retyping the whole first line removes the `#heroSpark` span, and the
+note burst with it, until reset.
 
 ### No annotations
 

@@ -486,11 +486,14 @@
   /* The outermost notes sit ~470px either side of centre, which runs past
      the viewport on a narrow window and adds a horizontal scrollbar. Pull
      the whole spread in rather than clipping notes in half. */
-  @media (max-width: 1400px) { .note-field { --spread: 0.86; } }
-  @media (max-width: 1280px) { .note-field { --spread: 0.74; } }
-  @media (max-width: 1120px) { .note-field { --spread: 0.6; } }
-  @media (max-width: 980px)  { .note-field { --spread: 0.46; } }
-  @media (max-width: 820px)  { .note-field { --spread: 0.34; } }
+  @media (max-width: 1380px) { .note-field { --spread: 0.94; } }
+  @media (max-width: 1240px) { .note-field { --spread: 0.84; } }
+  @media (max-width: 1100px) { .note-field { --spread: 0.74; } }
+  @media (max-width: 980px)  { .note-field { --spread: 0.64; } }
+  /* below this there's no clear band left between the text and the viewport
+     edge for the ring to live in — the word still inks blue, the notes sit
+     this one out */
+  @media (max-width: 900px)  { .note-field { display: none; } }
   /* the travel is on the wrapper, so the drift can animate independently */
   .note svg { display: block; width: 100%; height: 100%; }
   .note-inner {
@@ -513,6 +516,163 @@
                              calc(-50% + var(--dy) * var(--spread, 1)), 0);
     }
     .note-inner { animation: none; }
+  }
+
+  /* ---- text editor -------------------------------------------------------
+     A pencil above the theme toggle turns edit mode on. Editable text gets a
+     dashed outline on hover, a solid one when selected; the selected element
+     is contenteditable, drags by the grip above it, and the toolbar at the
+     bottom holds size / colour / nudge / reset. Everything is stored in
+     localStorage — this browser only — and "Copy changes" exports it. */
+  .edit-toggle { bottom: 76px; }
+  .edit-toggle svg { width: 17px; height: 17px; }
+  html.edit-on .edit-toggle {
+    color: rgb(var(--net));
+    border-color: rgba(var(--net), 0.55);
+  }
+  html.edit-on [data-edit] {
+    outline: 1.5px dashed transparent;
+    outline-offset: 8px;
+    cursor: text;
+    transition: outline-color 0.15s ease;
+    border-radius: 2px;
+  }
+  html.edit-on [data-edit]:hover { outline-color: rgba(var(--net), 0.5); }
+  html.edit-on [data-edit].edit-selected,
+  html.edit-on [data-edit].edit-selected:focus {
+    outline: 1.5px solid rgb(var(--net));
+  }
+  [data-edit][contenteditable]:focus { outline-style: solid; }
+  /* the hero's note burst is a distraction mid-edit */
+  html.edit-on .note-field { display: none !important; }
+
+  #editGrip {
+    position: fixed;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 22px;
+    border-radius: 999px;
+    background: rgb(var(--net));
+    color: #ffffff;
+    cursor: grab;
+    z-index: 96;
+    box-shadow: 0 2px 8px rgba(var(--net), 0.4);
+    touch-action: none;
+    user-select: none;
+  }
+  #editGrip:active { cursor: grabbing; }
+  #editGrip svg { width: 14px; height: 14px; display: block; }
+
+  #editBar {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translate(-50%, 14px);
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    max-width: min(920px, calc(100vw - 32px));
+    padding: 10px 14px;
+    border-radius: 16px;
+    background:
+      linear-gradient(168deg, var(--sheen) 0%, var(--sheen-soft) 40%,
+                      rgba(255, 255, 255, 0) 60%),
+      var(--menu-bg);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid var(--glass-rim);
+    box-shadow: var(--glass-lift-hover), var(--glass-lip);
+    z-index: 95;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  #editBar.open {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
+  }
+  #editBar .eb-name { font-weight: 600; white-space: nowrap; }
+  #editBar .eb-lab { color: var(--ink-3); }
+  #editBar .eb-div {
+    width: 1px;
+    height: 20px;
+    background: var(--line);
+    margin: 0 2px;
+  }
+  #editBar input[type="range"] {
+    width: 110px;
+    accent-color: rgb(var(--net));
+  }
+  #editBar .eb-val {
+    min-width: 42px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+  }
+  #editBar .eb-sw {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--glass-rim);
+    cursor: pointer;
+    padding: 0;
+  }
+  #editBar .eb-sw:hover { transform: scale(1.15); }
+  #editBar input[type="color"] {
+    width: 26px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid var(--glass-rim);
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+  }
+  #editBar .eb-n,
+  #editBar .eb-act {
+    font-family: inherit;
+    font-size: 12.5px;
+    color: var(--ink);
+    background: var(--glass-fill);
+    border: 1px solid var(--glass-rim);
+    border-radius: 999px;
+    padding: 4px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  #editBar .eb-n { padding: 4px 8px; }
+  #editBar .eb-fx {
+    font-family: inherit;
+    font-size: 12.5px;
+    width: 26px;
+    height: 24px;
+    padding: 0;
+    color: var(--ink);
+    background: var(--glass-fill);
+    border: 1px solid var(--glass-rim);
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  #editBar .eb-fx:hover {
+    background: var(--glass-fill-hover);
+    border-color: var(--glass-rim-hover);
+  }
+  #editBar .eb-n:hover,
+  #editBar .eb-act:hover {
+    background: var(--glass-fill-hover);
+    border-color: var(--glass-rim-hover);
+  }
+  #editBar .eb-done {
+    background: var(--ink-glass);
+    color: var(--ink-glass-fg);
+    border-color: rgba(255, 255, 255, 0.16);
   }
 
   .hero {
@@ -543,7 +703,7 @@
   }
   .headline {
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", sans-serif;
-    font-size: 72px;
+    font-size: clamp(38px, 5vw, 72px);
     font-weight: 500;
     line-height: 1.1;
     letter-spacing: -0.02em;
@@ -559,9 +719,16 @@
   .headline-line + .headline-line {
     margin-top: 10px;
   }
-  @media (max-width: 900px) {
-    .headline { font-size: 44px; }
+  /* the second line reads as the supporting statement, not a second
+     headline — smaller, lighter, quieter, so "Meet Étude." carries */
+  .headline-sub {
+    font-size: clamp(19px, 2.1vw, 30px);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--ink-2);
+    margin-top: 18px;
   }
+
 
   /* Liquid-glass CTA: translucent pane + blurred backdrop, an inner rim of
      light, and a specular highlight that sweeps across on hover. */
@@ -854,16 +1021,16 @@
         <span class="note" style="--dx:300px;--dy:226px;--o:0.7;--s:0.85;--r:-10deg;--d:0.85s;--w:33px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8.4 3.1 20.1 1.4a.6.6 0 0 1 .7.6v2.6a.6.6 0 0 1-.5.6L9.3 6.7v9.1a3.2 3.2 0 1 1-1.5-2.5V3.7a.6.6 0 0 1 .6-.6z"/><path d="M19.3 5.5a.6.6 0 0 1 .8.6v7.6a3.2 3.2 0 1 1-1.5-2.5V6.1a.6.6 0 0 1 .7-.6z"/></svg></span></span>
         <span class="note" style="--dx:-46px;--dy:272px;--o:0.6;--s:0.75;--r:16deg;--d:1.2s;--w:30px"><span class="note-inner"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2.6a.6.6 0 0 1 .95-.48c2.7 1.9 4.1 3.6 4.1 5.6 0 1.9-1.2 3.3-3 4.5v5.1a3.6 3.6 0 1 1-1.5-2.9V2.6zm1.5 7.8c1.1-.8 1.7-1.6 1.7-2.6 0-1-.5-1.9-1.7-3z"/></svg></span></span>
       </div>
-      <h1 class="headline"><span class="headline-line">Meet <span class="hero-spark" id="heroSpark">Étude</span>.</span><span class="headline-line">The fastest LLM inference on your Mac.</span></h1>
+      <h1 class="headline"><span class="headline-line" data-edit="hero-title" data-edit-label="Hero title">Meet <span class="hero-spark" id="heroSpark">Étude</span>.</span><span class="headline-line headline-sub" data-edit="hero-sub" data-edit-label="Hero subline">LLM on your MacBook: run by you, stays with you</span></h1>
       <a href="download.html" class="cta-button">Download Now</a>
-      <p class="cta-subtitle">Local only</p>
+      <p class="cta-subtitle" data-edit="cta-note" data-edit-label="Button caption">Local only</p>
     </div>
   </div>
 
   <div class="scroll-spacer">
     <div class="next-content">
-      <h1 class="next-headline">More work. Less time.</h1>
-      <p class="next-subtitle">Unmatched latency and throughput at your fingertips.</p>
+      <h1 class="next-headline" data-edit="s2-title" data-edit-label="Section 2 title">More work. Less time.</h1>
+      <p class="next-subtitle" data-edit="s2-sub" data-edit-label="Section 2 subtitle">Unmatched latency and throughput at your fingertips.</p>
     </div>
     <div class="media-collage" id="stage2Media">
       <div class="media-card" style="width:190px; height:240px; left:0; top:60px; transform:rotate(-6deg); background:linear-gradient(160deg, #2f2f33, #6e6e73);"></div>
@@ -879,8 +1046,8 @@
       <div class="media-card" style="width:160px; height:200px; left:200px; top:10px; transform:rotate(3deg); background:linear-gradient(160deg, #a1a1a6, #55555a);"></div>
     </div>
     <div class="stage3-content">
-      <h1 class="stage3-headline">All natively local to you</h1>
-      <p class="stage3-subtitle">Explore the <a href="models.html">open-weight models</a> offered and be secure that <a href="resources.html">your data stays yours</a>.</p>
+      <h1 class="stage3-headline" data-edit="s3-title" data-edit-label="Section 3 title">All natively local to you</h1>
+      <p class="stage3-subtitle" data-edit="s3-sub" data-edit-label="Section 3 subtitle">Explore the <a href="models.html">open-weight models</a> offered and be secure that <a href="resources.html">your data stays yours</a>.</p>
     </div>
   </div>
   <div class="end-spacer"></div>
@@ -919,6 +1086,55 @@
     })();
   </script>
 
+  <button class="theme-toggle edit-toggle" id="editToggle" type="button"
+          aria-label="Edit page text" title="Edit text">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+         stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16.6 3.6a2.1 2.1 0 0 1 3 3L7.4 18.8 3 20l1.2-4.4z"/>
+      <path d="M14.5 5.7l3 3"/>
+    </svg>
+  </button>
+
+  <div id="editGrip" title="Drag to move">
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="8" cy="7" r="1.7"/><circle cx="16" cy="7" r="1.7"/>
+      <circle cx="8" cy="12" r="1.7"/><circle cx="16" cy="12" r="1.7"/>
+      <circle cx="8" cy="17" r="1.7"/><circle cx="16" cy="17" r="1.7"/>
+    </svg>
+  </div>
+
+  <div id="editBar">
+    <span class="eb-name" id="ebName">&mdash;</span>
+    <span class="eb-div"></span>
+    <span class="eb-lab">Size</span>
+    <input type="range" id="ebSize" min="12" max="130" step="1">
+    <span class="eb-val" id="ebSizeVal">&ndash;</span>
+    <span class="eb-div"></span>
+    <span class="eb-lab">Colour</span>
+    <button class="eb-sw" type="button" data-c="var(--ink)" style="background:#0b0b0d" title="Ink"></button>
+    <button class="eb-sw" type="button" data-c="var(--ink-2)" style="background:#6e6e73" title="Grey"></button>
+    <button class="eb-sw" type="button" data-c="var(--ink-3)" style="background:#a1a1a6" title="Light"></button>
+    <button class="eb-sw" type="button" data-c="rgb(var(--net))" style="background:#4a90d9" title="Blue"></button>
+    <input type="color" id="ebColor" value="#4a90d9" title="Custom colour">
+    <span class="eb-div"></span>
+    <span class="eb-lab">Style</span>
+    <button class="eb-fx" type="button" data-fx="bold" title="Bold — selected words, or the whole box"><b>B</b></button>
+    <button class="eb-fx" type="button" data-fx="italic" title="Italic — selected words, or the whole box"><i>I</i></button>
+    <button class="eb-fx" type="button" data-fx="underline" title="Underline — selected words, or the whole box"><u>U</u></button>
+    <button class="eb-fx" type="button" data-fx="removeFormat" title="Clear word styling — selected words, or the whole box">&#10005;</button>
+    <span class="eb-div"></span>
+    <span class="eb-lab">Move</span>
+    <button class="eb-n" type="button" data-dx="-1" title="Left (Shift = 10px)">&larr;</button>
+    <button class="eb-n" type="button" data-dy="-1" title="Up (Shift = 10px)">&uarr;</button>
+    <button class="eb-n" type="button" data-dy="1" title="Down (Shift = 10px)">&darr;</button>
+    <button class="eb-n" type="button" data-dx="1" title="Right (Shift = 10px)">&rarr;</button>
+    <span class="eb-div"></span>
+    <button class="eb-act" type="button" id="ebResetOne">Reset this</button>
+    <button class="eb-act" type="button" id="ebCopy">Copy changes</button>
+    <button class="eb-act" type="button" id="ebResetAll">Reset all</button>
+    <button class="eb-act eb-done" type="button" id="ebDone">Done</button>
+  </div>
+
   <button class="theme-toggle" id="themeToggle" type="button"
           aria-label="Switch between light and dark" title="Light / dark">
     <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -950,20 +1166,19 @@
   </script>
 
   <script>
-    // Notes scatter out of "Étude" on hover and retract on leave. Bound to
-    // the word, but the class goes on .hero-content because that's what the
-    // note layer is positioned against.
+    // Notes scatter on hover over "Étude" OR the Download Now button, and
+    // retract on leave. The class goes on .hero-content because that's what
+    // the note layer is positioned against.
     (function() {
-      var word = document.getElementById('heroSpark');
-      var host = word && word.closest('.hero-content');
-      if (!word || !host) return;
+      var host = document.querySelector('.hero-content');
+      if (!host) return;
 
       var notes = [].slice.call(host.querySelectorAll('.note'));
 
-      function show(on) {
+      function apply(on) {
         host.classList.toggle('notes-on', on);
-        // Stagger outward from the word and unwind in reverse on the way
-        // back, so they retract in the order they appeared.
+        // Stagger outward and unwind in reverse on the way back, so they
+        // retract in the order they appeared.
         notes.forEach(function(n, i) {
           var step = on ? i : (notes.length - 1 - i);
           // tighter on the way back — the full 32ms cascade in reverse read
@@ -972,11 +1187,350 @@
         });
       }
 
-      word.addEventListener('mouseenter', function() { show(true); });
-      word.addEventListener('mouseleave', function() { show(false); });
+      // Two triggers share one field, so hiding waits a beat: travelling
+      // from the word down to the button (or back) would otherwise start a
+      // retract in the gap and pop straight back out — a visible stutter.
+      // 130ms covers the crossing at normal pointer speed and is barely
+      // perceptible on a genuine leave.
+      var hideTimer = null;
+      function show() {
+        if (document.documentElement.classList.contains('edit-on')) return;
+        if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+        apply(true);
+      }
+      function hide() {
+        if (hideTimer) clearTimeout(hideTimer);
+        hideTimer = setTimeout(function() { apply(false); hideTimer = null; }, 130);
+      }
+
+      // Delegated rather than bound to the nodes: the text editor's reset
+      // rebuilds the headline's innerHTML, which destroys and recreates the
+      // #heroSpark span — direct listeners would die with the old node.
+      function trigger(node) {
+        return node && node.closest ? node.closest('#heroSpark, .cta-button') : null;
+      }
+      document.addEventListener('mouseover', function(e) {
+        var t = trigger(e.target);
+        if (!t || trigger(e.relatedTarget) === t) return;
+        show();
+      });
+      document.addEventListener('mouseout', function(e) {
+        var t = trigger(e.target);
+        if (!t || trigger(e.relatedTarget) === t) return;
+        hide();
+      });
       // keyboard and touch get the same thing without a pointer
-      word.addEventListener('focus', function() { show(true); });
-      word.addEventListener('blur', function() { show(false); });
+      document.addEventListener('focusin', function(e) { if (trigger(e.target)) show(); });
+      document.addEventListener('focusout', function(e) { if (trigger(e.target)) hide(); });
+    })();
+  </script>
+
+  <script>
+    // ---- text editor -------------------------------------------------------
+    // Click the pencil, then click any marked text: it becomes editable in
+    // place, drags by the grip above it, and the toolbar sets size, colour
+    // and position. State lives in localStorage under "etude-edits" — THIS
+    // BROWSER ONLY. "Copy changes" puts the whole edit set on the clipboard
+    // as JSON, which is how tweaks get baked into the real file.
+    (function() {
+      // The editor is a workbench tool, not part of the site. It only wires
+      // up when the page is opened from disk or a local server, or when
+      // "?edit" is added to the URL as an escape hatch. On the deployed
+      // site (github.io or anywhere else) the pencil, grip and toolbar are
+      // removed outright before anything else runs.
+      var ALLOW = location.protocol === 'file:' ||
+                  /^(localhost|127\.|\[::1\])/.test(location.hostname) ||
+                  /(^|[?#&])edit(=|&|$)/.test(location.search + location.hash);
+      if (!ALLOW) {
+        ['editToggle', 'editBar', 'editGrip'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el && el.parentNode) el.parentNode.removeChild(el);
+        });
+        return;
+      }
+
+      var KEY = 'etude-edits';
+      var root = document.documentElement;
+      var els = {}, originals = {};
+      document.querySelectorAll('[data-edit]').forEach(function(e) {
+        var id = e.getAttribute('data-edit');
+        els[id] = e;
+        originals[id] = e.innerHTML;   // captured before saved edits apply
+      });
+
+      var edits = {};
+      try { edits = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
+
+      function save() {
+        try { localStorage.setItem(KEY, JSON.stringify(edits)); } catch (e) {}
+      }
+      function slot(id) { return edits[id] || (edits[id] = {}); }
+
+      function applyOne(id) {
+        var el = els[id], d = edits[id] || {};
+        if (!el) return;
+        el.style.fontSize = d.size != null ? d.size + 'px' : '';
+        el.style.color = d.color != null ? d.color : '';
+        el.style.transform = (d.x || d.y)
+          ? 'translate(' + (d.x || 0) + 'px, ' + (d.y || 0) + 'px)' : '';
+      }
+      Object.keys(edits).forEach(function(id) {
+        if (!els[id]) return;
+        if (edits[id].html != null) els[id].innerHTML = edits[id].html;
+        applyOne(id);
+      });
+
+      var savedRange;   // set by the word-styling block below
+      var toggle = document.getElementById('editToggle');
+      var bar = document.getElementById('editBar');
+      var grip = document.getElementById('editGrip');
+      var nameEl = document.getElementById('ebName');
+      var sizeIn = document.getElementById('ebSize');
+      var sizeVal = document.getElementById('ebSizeVal');
+      var colorIn = document.getElementById('ebColor');
+      var sel = null, selId = null;
+
+      function placeGrip() {
+        if (!sel || !root.classList.contains('edit-on')) {
+          grip.style.display = 'none';
+          return;
+        }
+        var r = sel.getBoundingClientRect();
+        grip.style.display = 'flex';
+        grip.style.left = (r.left + r.width / 2 - 17) + 'px';
+        grip.style.top = Math.max(6, r.top - 30) + 'px';
+      }
+      window.addEventListener('scroll', placeGrip, { passive: true });
+      window.addEventListener('resize', placeGrip);
+
+      function select(el) {
+        if (sel) {
+          sel.classList.remove('edit-selected');
+          sel.removeAttribute('contenteditable');
+        }
+        sel = el;
+        selId = el ? el.getAttribute('data-edit') : null;
+        savedRange = null;
+        if (el) {
+          el.classList.add('edit-selected');
+          el.setAttribute('contenteditable', 'plaintext-only');
+          if (el.contentEditable === 'inherit') el.setAttribute('contenteditable', 'true');
+          nameEl.textContent = el.getAttribute('data-edit-label') || selId;
+          var fs = Math.round(parseFloat(getComputedStyle(el).fontSize));
+          sizeIn.value = fs;
+          sizeVal.textContent = fs + 'px';
+        } else {
+          nameEl.textContent = 'Click any outlined text';
+        }
+        placeGrip();
+      }
+
+      toggle.addEventListener('click', function() {
+        var on = root.classList.toggle('edit-on');
+        bar.classList.toggle('open', on);
+        if (on) nameEl.textContent = 'Click any outlined text';
+        else select(null);
+      });
+
+      // In edit mode: clicks select text and never follow links.
+      document.addEventListener('click', function(e) {
+        if (!root.classList.contains('edit-on')) return;
+        var inUi = e.target.closest('#editBar, #editGrip, #editToggle, #themeToggle');
+        if (inUi) return;
+        var a = e.target.closest('a');
+        if (a) e.preventDefault();
+        var t = e.target.closest('[data-edit]');
+        if (t) { if (t !== sel) select(t); }
+        else select(null);
+      }, true);
+
+      // typing edits the element in place
+      document.addEventListener('input', function(e) {
+        if (!sel || e.target !== sel) return;
+        slot(selId).html = sel.innerHTML;
+        save();
+        placeGrip();
+      });
+
+      sizeIn.addEventListener('input', function() {
+        if (!sel) return;
+        slot(selId).size = parseInt(sizeIn.value, 10);
+        sizeVal.textContent = sizeIn.value + 'px';
+        applyOne(selId); save(); placeGrip();
+      });
+
+      // ---- word-level styling ---------------------------------------
+      // While a run of text inside the selected box is highlighted, colour
+      // and the Style buttons act on that run only; with nothing highlighted
+      // they act on the whole box, as before. The live Range is captured on
+      // every selectionchange, because clicking a toolbar control moves
+      // focus and would otherwise lose it.
+      savedRange = null;
+      document.addEventListener('selectionchange', function() {
+        if (!sel) { savedRange = null; return; }
+        var s = document.getSelection();
+        var ok = s && s.rangeCount && !s.isCollapsed &&
+                 sel.contains(s.anchorNode) && sel.contains(s.focusNode);
+        savedRange = ok ? s.getRangeAt(0).cloneRange() : null;
+        var label = sel.getAttribute('data-edit-label') || selId;
+        nameEl.textContent = savedRange ? label + ' (selection)' : label;
+      });
+      // toolbar mousedowns must not steal focus, or the highlight collapses
+      // before the click handler runs
+      [].forEach.call(bar.querySelectorAll('.eb-sw, .eb-fx'), function(b) {
+        b.addEventListener('mousedown', function(e) { e.preventDefault(); });
+      });
+
+      function restoreRange() {
+        sel.focus({ preventScroll: true });
+        var s = document.getSelection();
+        s.removeAllRanges();
+        s.addRange(savedRange);
+      }
+      // The boxes edit as plaintext-only, which also disables every
+      // formatting command — so rich editing is switched on just for the
+      // instant a command runs, then switched straight back.
+      function withRich(fn) {
+        var prev = sel.getAttribute('contenteditable') || 'plaintext-only';
+        sel.setAttribute('contenteditable', 'true');
+        try { fn(); } finally { sel.setAttribute('contenteditable', prev); }
+      }
+      function selectWholeBox() {
+        sel.focus({ preventScroll: true });
+        var r = document.createRange();
+        r.selectNodeContents(sel);
+        var s = document.getSelection();
+        s.removeAllRanges();
+        s.addRange(r);
+      }
+      function commitHtml() {
+        slot(selId).html = sel.innerHTML;
+        save();
+      }
+
+      // execCommand rejects token strings like var(--ink), so those go on
+      // via a sentinel colour that is swapped for the token afterwards —
+      // keeping word colours theme-aware like the whole-box ones.
+      var SENTINEL = '#010203';
+      function colourSelection(css) {
+        withRich(function() {
+          restoreRange();
+          document.execCommand('styleWithCSS', false, true);
+          var isToken = css.indexOf('var(') !== -1;
+          document.execCommand('foreColor', false, isToken ? SENTINEL : css);
+          if (isToken) {
+            [].forEach.call(sel.querySelectorAll('[style]'), function(n) {
+              if (n.style.color === 'rgb(1, 2, 3)') n.style.color = css;
+            });
+          }
+        });
+        commitHtml();
+      }
+      function setColour(css) {
+        if (!sel) return;
+        if (savedRange) { colourSelection(css); }
+        else {
+          slot(selId).color = css;
+          applyOne(selId); save();
+        }
+      }
+      [].forEach.call(bar.querySelectorAll('.eb-sw'), function(sw) {
+        sw.addEventListener('click', function() {
+          setColour(sw.getAttribute('data-c'));
+        });
+      });
+      colorIn.addEventListener('input', function() { setColour(colorIn.value); });
+
+      [].forEach.call(bar.querySelectorAll('.eb-fx'), function(btn) {
+        btn.addEventListener('click', function() {
+          if (!sel) return;
+          var had = !!savedRange;
+          withRich(function() {
+            if (had) restoreRange(); else selectWholeBox();
+            document.execCommand('styleWithCSS', false, true);
+            document.execCommand(btn.getAttribute('data-fx'), false, null);
+            if (!had) document.getSelection().collapseToEnd();
+          });
+          commitHtml();
+        });
+      });
+
+      [].forEach.call(bar.querySelectorAll('.eb-n'), function(btn) {
+        btn.addEventListener('click', function(e) {
+          if (!sel) return;
+          var step = e.shiftKey ? 10 : 1;
+          var d = slot(selId);
+          d.x = (d.x || 0) + step * (parseInt(btn.getAttribute('data-dx') || 0, 10));
+          d.y = (d.y || 0) + step * (parseInt(btn.getAttribute('data-dy') || 0, 10));
+          applyOne(selId); save(); placeGrip();
+        });
+      });
+
+      // coarse placement: drag the grip
+      var drag = null;
+      grip.addEventListener('pointerdown', function(e) {
+        if (!sel) return;
+        var d = slot(selId);
+        drag = { cx: e.clientX, cy: e.clientY, x: d.x || 0, y: d.y || 0 };
+        grip.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+      grip.addEventListener('pointermove', function(e) {
+        if (!drag || !sel) return;
+        var d = slot(selId);
+        d.x = Math.round(drag.x + e.clientX - drag.cx);
+        d.y = Math.round(drag.y + e.clientY - drag.cy);
+        applyOne(selId); placeGrip();
+      });
+      grip.addEventListener('pointerup', function() { if (drag) { drag = null; save(); } });
+      grip.addEventListener('pointercancel', function() { if (drag) { drag = null; save(); } });
+
+      function resetOne(id) {
+        if (!els[id]) return;
+        els[id].innerHTML = originals[id];
+        delete edits[id];
+        applyOne(id);
+      }
+      document.getElementById('ebResetOne').addEventListener('click', function() {
+        if (!selId) return;
+        var id = selId;
+        select(null);
+        resetOne(id); save();
+      });
+      document.getElementById('ebResetAll').addEventListener('click', function() {
+        select(null);
+        Object.keys(els).forEach(resetOne);
+        edits = {}; save();
+      });
+      document.getElementById('ebDone').addEventListener('click', function() {
+        select(null);
+        root.classList.remove('edit-on');
+        bar.classList.remove('open');
+      });
+
+      document.getElementById('ebCopy').addEventListener('click', function() {
+        var btn = this;
+        var payload = JSON.stringify(edits, null, 2);
+        function done(ok) {
+          btn.textContent = ok ? 'Copied \u2713' : 'Copy failed';
+          setTimeout(function() { btn.textContent = 'Copy changes'; }, 1600);
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(payload).then(function() { done(true); },
+            function() { fallback(); });
+        } else { fallback(); }
+        function fallback() {
+          var ta = document.createElement('textarea');
+          ta.value = payload;
+          ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          var ok = false;
+          try { ok = document.execCommand('copy'); } catch (e) {}
+          document.body.removeChild(ta);
+          done(ok);
+        }
+      });
     })();
   </script>
 
